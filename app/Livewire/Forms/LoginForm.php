@@ -13,7 +13,7 @@ use Livewire\Form;
 class LoginForm extends Form
 {
     #[Validate('required|string')]
-    public string $phone = ''; // غيرنا email لـ phone
+    public string $phone = '';
 
     #[Validate('required|string')]
     public string $password = '';
@@ -25,7 +25,6 @@ class LoginForm extends Form
     {
         $this->ensureIsNotRateLimited();
 
-        // التعديل هنا: بنستخدم phone و password
         if (! Auth::attempt($this->only(['phone', 'password']), $this->remember)) {
             RateLimiter::hit($this->throttleKey());
 
@@ -57,7 +56,6 @@ class LoginForm extends Form
 
     protected function throttleKey(): string
     {
-        // التعديل هنا
         return Str::transliterate(Str::lower($this->phone).'|'.request()->ip());
     }
 }
