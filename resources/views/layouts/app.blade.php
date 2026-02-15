@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
     <!-- Prevent zooming issues on mobile inputs -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
+     <link rel="manifest" href="{{ asset('manifest.json') }}">
+    <link rel="icon" href="{{ asset('icons/icon.png') }}">
 
     <title>{{ config('app.name', 'خدمة التلمذة') }}</title>
 
