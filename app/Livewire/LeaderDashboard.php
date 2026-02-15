@@ -48,7 +48,7 @@ class LeaderDashboard extends Component
             'family_id' => $this->family->id,
             'week_date' => now(),
             'status' => 'pending',
-            'max_note_score' => 100,
+            'max_note_score' => 28,
         ]);
 
         return redirect(request()->header('Referer'));
