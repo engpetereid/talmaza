@@ -50,7 +50,7 @@ class LessonLibrary extends Component
     public function saveResource()
     {
         $this->validate([
-            'newDescription' => 'required|string|max:1000',
+            'newDescription' => 'required|string|max:5000',
             'newFile' => 'nullable|file|max:10240|mimes:pdf,doc,docx,jpg,png,jpeg',
         ], [
             'newDescription.required' => 'يرجى كتابة وصف أو ملخص للملف.',
