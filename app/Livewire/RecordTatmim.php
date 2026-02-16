@@ -113,11 +113,21 @@ class RecordTatmim extends Component
                         'has_servants_meeting' => false,
                         'has_reading' => false,
                         'has_family_altar' => false,
-                
+
                         'comments' => null,
                     ]
                 );
-                $this->records[$member->id] = $record->toArray();
+
+                // Convert to array for Livewire state
+                $data = $record->toArray();
+
+                // Mask 0 values as empty strings for the UI display
+                // This removes the default '0' from the input fields
+                if ($data['note_score'] === 0) $data['note_score'] = '';
+                if ($data['talmaza_training_count'] === 0) $data['talmaza_training_count'] = '';
+                if ($data['kholwa_count'] === 0) $data['kholwa_count'] = '';
+
+                $this->records[$member->id] = $data;
             }
         }
 
@@ -136,6 +146,7 @@ class RecordTatmim extends Component
             $memberId = $parts[1];
             $field = $parts[2];
 
+            // If input is empty, save as 0 in DB (since DB doesn't allow null)
             if ($value === '' && in_array($field, ['note_score', 'kholwa_count', 'talmaza_training_count'])) {
                 $value = 0;
             }

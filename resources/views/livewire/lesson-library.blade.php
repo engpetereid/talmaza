@@ -183,7 +183,9 @@
                                         <div class="p-5 text-lg font-medium leading-relaxed text-gray-800 whitespace-pre-line border bg-gray-50/50 rounded-2xl border-gray-50">
                                             {{ $resource->description }}
                                         </div>
+                                    <br><br>
                                     </div>
+
                                 @empty
                                     <div class="py-16 text-center bg-white border-2 border-gray-200 border-dashed rounded-3xl">
                                         <div class="flex items-center justify-center w-20 h-20 mx-auto mb-4 text-4xl rounded-full bg-gray-50 grayscale opacity-30">📂</div>
