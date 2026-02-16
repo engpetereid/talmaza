@@ -1,4 +1,4 @@
-<div class="min-h-screen pb-40 space-y-6 bg-gray-50">
+<div class="min-h-screen pb-20 bg-gray-50">
 
     <!-- Header -->
     <div class="sticky top-0 z-20 bg-white border-b border-gray-200 shadow-sm">
@@ -19,7 +19,7 @@
 
     <div class="px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start h-[calc(100vh-140px)]">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start min-h-[calc(100vh-140px)]">
 
             <!-- LEFT COLUMN: Navigation (Stages & Lessons) -->
             <!-- Scrollable Sidebar on PC -->
@@ -140,7 +140,7 @@
                             </div>
 
                             <!-- Resources List -->
-                            <div class="pb-32 space-y-6">
+                            <div class="pb-8 space-y-6">
                                 <h3 class="flex items-center gap-3 text-xl font-bold text-gray-800">
                                     <span class="w-2 h-8 bg-indigo-600 rounded-full"></span>
                                     مشاركات القادة ({{ $activeLesson->resources->count() }})
@@ -183,6 +183,7 @@
                                         <div class="p-5 text-lg font-medium leading-relaxed text-gray-800 whitespace-pre-line border bg-gray-50/50 rounded-2xl border-gray-50">
                                             {{ $resource->description }}
                                         </div>
+
                                     </div>
 
                                 @empty
@@ -204,7 +205,6 @@
                         <p class="max-w-md text-xl font-medium leading-relaxed text-gray-500">اضغط على أي درس من القائمة الجانبية لعرض المصادر والمشاركات الخاصة به.</p>
                     </div>
                 @endif
-
             </div>
         </div>
 
