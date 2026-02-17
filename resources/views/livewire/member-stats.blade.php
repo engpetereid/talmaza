@@ -229,7 +229,7 @@
                     <div class="text-3xl font-black text-orange-800">{{ $metrics['mass']['average'] }}%</div>
                 </div>
                 <div class="flex flex-col justify-center p-4 border border-yellow-100 bg-yellow-50 rounded-3xl">
-                    <div class="mb-1 text-xs font-black text-yellow-600 uppercase">تلمذة</div>
+                    <div class="mb-1 text-xs font-black text-yellow-600 uppercase">تدريب التلمذة</div>
                     <div class="text-3xl font-black text-yellow-800">{{ $metrics['training']['average'] }}%</div>
                 </div>
                 <div class="flex flex-col justify-center p-4 border border-teal-100 bg-teal-50 rounded-3xl">
@@ -241,7 +241,7 @@
                 <div class="col-span-2 my-2 border-t border-gray-100 sm:col-span-3 md:col-span-5"></div>
 
                 <div class="pt-2">
-                    <div class="mb-1 text-sm font-bold text-gray-500">مشاركة خلوة</div>
+                    <div class="mb-1 text-sm font-bold text-gray-500">مشاركة الخلوة</div>
                     <div class="text-2xl font-black text-gray-800">{{ $metrics['kholwa']['average'] }}%</div>
                 </div>
                 <div class="pt-2">
