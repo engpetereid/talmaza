@@ -19,7 +19,7 @@ class ReportForm extends Component
     public $isReadOnly = false;
 
     // --- Weekly Report Data ---
-    public $timeline = [['time' => '', 'activity' => '']];
+    public $timeline = [['time' => '', 'activity' => '', 'reply' => '']];
     public $weekly_achievements = [['text' => '', 'reply' => '']];
     public $visitation_hours;
 
@@ -53,7 +53,7 @@ class ReportForm extends Component
             $this->isReadOnly = true;
 
             // Load Data
-            $this->timeline = $report->timeline ?? [['time' => '', 'activity' => '']];
+            $this->timeline = $report->timeline ?? [['time' => '', 'activity' => '', 'reply' => '']];
             $this->weekly_achievements = $report->weekly_achievements ?? [['text' => '', 'reply' => '']];
             $this->visitation_hours = $report->visitation_hours;
             $this->monthly_summary = $report->monthly_summary ?? [['text' => '', 'reply' => '']];
@@ -63,8 +63,7 @@ class ReportForm extends Component
             $this->members_notes = $report->members_notes ?? [];
             $this->admin_general_reply = $report->admin_reply;
             $this->admin_reply_at = $report->admin_reply_at;
-        }
-        else {
+        } else {
             $this->type = $type;
             $this->family = Auth::user()->family;
         }
@@ -72,7 +71,7 @@ class ReportForm extends Component
         if ($this->family) {
             $this->familyMembers = $this->family->members()->get();
 
-            if($this->isReadOnly) {
+            if ($this->isReadOnly) {
                 foreach ($this->familyMembers as $member) {
                     if (!isset($this->members_notes[$member->id])) {
                         $this->members_notes[$member->id] = ['text' => '', 'reply' => ''];
@@ -127,7 +126,7 @@ class ReportForm extends Component
 
     public function addTimelineRow()
     {
-        $this->timeline[] = ['time' => '', 'activity' => ''];
+        $this->timeline[] = ['time' => '', 'activity' => '', 'reply' => ''];
     }
 
     public function removeTimelineRow($index)
@@ -162,9 +161,17 @@ class ReportForm extends Component
         }
 
         $globalSums = [
-            'attendance' => 0, 'note' => 0, 'kholwa' => 0, 'training' => 0,
-            'weekly_kholwa' => 0, 'mass' => 0, 'vespers' => 0, 'tasbeha' => 0,
-            'servants' => 0, 'reading' => 0, 'altar' => 0,
+            'attendance' => 0,
+            'note' => 0,
+            'kholwa' => 0,
+            'training' => 0,
+            'weekly_kholwa' => 0,
+            'mass' => 0,
+            'vespers' => 0,
+            'tasbeha' => 0,
+            'servants' => 0,
+            'reading' => 0,
+            'altar' => 0,
         ];
 
         $totalPresentCount = 0;
@@ -173,9 +180,15 @@ class ReportForm extends Component
             $memberStats = [
                 'name' => $member->name,
                 'is_active' => $member->is_active,
-                'attendance' => 0, 'note_score' => 0, 'has_mass' => 0,
-                'has_servants_meeting' => 0, 'has_tasbeha' => 0, 'has_reading' => 0,
-                'has_family_altar' => 0, 'kholwa_count' => 0, 'talmaza_training_count' => 0,
+                'attendance' => 0,
+                'note_score' => 0,
+                'has_mass' => 0,
+                'has_servants_meeting' => 0,
+                'has_tasbeha' => 0,
+                'has_reading' => 0,
+                'has_family_altar' => 0,
+                'kholwa_count' => 0,
+                'talmaza_training_count' => 0,
                 'has_weekly_kholwa' => 0,
             ];
 
@@ -192,15 +205,33 @@ class ReportForm extends Component
                     $maxNote = max($meeting->max_note_score, 1);
                     $memberStats['note_score'] += ($record->note_score / $maxNote);
                     if ($record->is_present) {
-                         $globalSums['note'] += ($record->note_score / $maxNote);
+                        $globalSums['note'] += ($record->note_score / $maxNote);
                     }
 
-                    if ($record->has_mass) { $memberStats['has_mass']++; if($record->is_present) $globalSums['mass']++; }
-                    if ($record->has_servants_meeting) { $memberStats['has_servants_meeting']++; if($record->is_present) $globalSums['servants']++; }
-                    if ($record->has_vespers || $record->has_tasbeha) { $memberStats['has_tasbeha']++; if($record->is_present) $globalSums['vespers']++; }
-                    if ($record->has_reading) { $memberStats['has_reading']++; if($record->is_present) $globalSums['reading']++; }
-                    if ($record->has_family_altar) { $memberStats['has_family_altar']++; if($record->is_present) $globalSums['altar']++; }
-                    if ($record->has_weekly_kholwa) { $memberStats['has_weekly_kholwa']++; if($record->is_present) $globalSums['weekly_kholwa']++; }
+                    if ($record->has_mass) {
+                        $memberStats['has_mass']++;
+                        if ($record->is_present) $globalSums['mass']++;
+                    }
+                    if ($record->has_servants_meeting) {
+                        $memberStats['has_servants_meeting']++;
+                        if ($record->is_present) $globalSums['servants']++;
+                    }
+                    if ($record->has_vespers || $record->has_tasbeha) {
+                        $memberStats['has_tasbeha']++;
+                        if ($record->is_present) $globalSums['vespers']++;
+                    }
+                    if ($record->has_reading) {
+                        $memberStats['has_reading']++;
+                        if ($record->is_present) $globalSums['reading']++;
+                    }
+                    if ($record->has_family_altar) {
+                        $memberStats['has_family_altar']++;
+                        if ($record->is_present) $globalSums['altar']++;
+                    }
+                    if ($record->has_weekly_kholwa) {
+                        $memberStats['has_weekly_kholwa']++;
+                        if ($record->is_present) $globalSums['weekly_kholwa']++;
+                    }
 
                     $memberStats['kholwa_count'] += min($record->kholwa_count / 7, 1);
                     if ($record->kholwa_count > 3 && $record->is_present) $globalSums['kholwa']++;
@@ -227,8 +258,8 @@ class ReportForm extends Component
 
         $keys = ['kholwa', 'training', 'weekly_kholwa', 'mass', 'vespers', 'servants', 'reading', 'altar'];
         foreach ($keys as $k) {
-             $srcKey = $k == 'vespers' ? 'vespers' : $k;
-             $avgs[$k] = round(($globalSums[$srcKey] / $totalOpp) * 100);
+            $srcKey = $k == 'vespers' ? 'vespers' : $k;
+            $avgs[$k] = round(($globalSums[$srcKey] / $totalOpp) * 100);
         }
 
         $this->stats_snapshot = array_merge([
@@ -270,6 +301,7 @@ class ReportForm extends Component
         $report = Report::find($this->reportId);
 
         $report->update([
+            'timeline' => $this->type == 'weekly' ? $this->timeline : null, // Added timeline update
             'weekly_achievements' => $this->type == 'weekly' ? $this->weekly_achievements : null,
             'monthly_summary' => $this->type == 'monthly' ? $this->monthly_summary : null,
             'priest_message' => $this->priest_message,

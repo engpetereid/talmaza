@@ -48,27 +48,49 @@
                         <span class="p-2 text-indigo-600 bg-indigo-100 rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
                         ترتيب لقاء التلمذة
                     </h3>
-                    <div class="space-y-3">
+                    <div class="space-y-4">
                         @foreach($timeline as $index => $row)
-                            <div class="flex items-center gap-3 group">
-                                @if(!$isReadOnly)
-                                    <input type="text" wire:model="timeline.{{ $index }}.time" placeholder="6-6:30"
-                                           class="w-20 px-1 py-3 font-mono text-sm font-bold text-center border-2 border-gray-200 bg-gray-50 rounded-xl focus:ring-indigo-500 focus:border-indigo-500">
+                            <div class="flex flex-col gap-3 group {{ $isReadOnly && Auth::user()->role == 'admin' ? 'p-4 border-2 border-indigo-100 bg-indigo-50/30 rounded-2xl' : '' }}">
+                                <div class="flex items-center gap-3">
+                                    @if(!$isReadOnly)
+                                        <input type="text" wire:model="timeline.{{ $index }}.time" placeholder="6-6:30"
+                                               class="w-20 px-1 py-3 font-mono text-sm font-bold text-center border-2 border-gray-200 bg-gray-50 rounded-xl focus:ring-indigo-500 focus:border-indigo-500">
 
-                                    <input type="text" wire:model="timeline.{{ $index }}.activity" placeholder="اكتب النشاط هنا..."
-                                           class="flex-grow px-2 py-3 text-sm font-bold border-2 border-gray-200 bg-gray-50 rounded-xl focus:ring-indigo-500 focus:border-indigo-500">
+                                        <input type="text" wire:model="timeline.{{ $index }}.activity" placeholder="اكتب النشاط هنا..."
+                                               class="flex-grow px-2 py-3 text-sm font-bold border-2 border-gray-200 bg-gray-50 rounded-xl focus:ring-indigo-500 focus:border-indigo-500">
 
-                                    <button wire:click="removeTimelineRow({{ $index }})"
-                                            class="flex items-center justify-center w-10 h-10 text-red-400 transition-colors hover:text-red-600 hover:bg-red-50 rounded-xl">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                                    </button>
-                                @else
-                                    <div class="flex items-center justify-between w-full px-4 py-3 border border-gray-100 bg-gray-50 rounded-xl">
-                                        <span class="px-3 py-1 font-mono text-sm font-black text-indigo-700 bg-white border border-indigo-100 rounded-lg shadow-sm">
-                                            {{ isset($row['time']) ? $row['time'] : ($row['start'] . ' - ' . $row['end']) }}
-                                        </span>
-                                        <span class="text-base font-bold text-gray-900">{{ $row['activity'] }}</span>
-                                    </div>
+                                        <button wire:click="removeTimelineRow({{ $index }})"
+                                                class="flex items-center justify-center w-10 h-10 text-red-400 transition-colors hover:text-red-600 hover:bg-red-50 rounded-xl">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                        </button>
+                                    @else
+                                        <div class="flex items-center justify-between w-full px-4 py-3 border border-gray-100 bg-gray-50 rounded-xl">
+                                            <span class="px-3 py-1 font-mono text-sm font-black text-indigo-700 bg-white border border-indigo-100 rounded-lg shadow-sm">
+                                                {{ isset($row['time']) ? $row['time'] : (($row['start'] ?? '') . ' - ' . ($row['end'] ?? '')) }}
+                                            </span>
+                                            <span class="text-base font-bold text-gray-900">{{ $row['activity'] }}</span>
+                                        </div>
+                                    @endif
+                                </div>
+
+                                <!-- Reply Section for Timeline -->
+                                @if($isReadOnly)
+                                    @if(Auth::user()->role == 'admin')
+                                        <div class="flex items-start gap-3 pt-2 mt-1 border-t border-indigo-200/50">
+                                            <div class="px-2 py-1 mt-2 text-xs font-black text-indigo-800 bg-indigo-200 rounded">رد:</div>
+                                            <textarea wire:model="timeline.{{ $index }}.reply" rows="2"
+                                                      class="flex-grow p-3 text-sm font-medium bg-white border-2 border-indigo-200 rounded-xl focus:border-indigo-500 focus:ring-indigo-500"
+                                                      placeholder="تعليق على الفقرة..."></textarea>
+                                        </div>
+                                    @elseif(!empty($row['reply']))
+                                        <div class="flex items-start gap-3 p-4 mt-2 border border-indigo-100 bg-indigo-50 rounded-xl">
+                                            <div class="flex items-center justify-center flex-shrink-0 w-8 h-8 text-indigo-800 bg-indigo-200 rounded-full">✍️</div>
+                                            <div>
+                                                <span class="block mb-1 text-xs font-black tracking-wider text-indigo-800 uppercase">تعليق الإدارة</span>
+                                                <p class="text-sm font-bold leading-relaxed text-indigo-900">{{ $row['reply'] }}</p>
+                                            </div>
+                                        </div>
+                                    @endif
                                 @endif
                             </div>
                         @endforeach
