@@ -9,8 +9,7 @@
 
             <!-- Header (Navigation) -->
             <div class="flex items-center justify-between mb-10">
-                <a href="{{ url()->previous() }}"
-                    wire:navigate
+                <a href="{{ url()->previous() }}" wire:navigate
                     class="flex items-center gap-2 px-5 py-3 text-base font-bold transition-colors border rounded-2xl bg-white/10 hover:bg-white/20 backdrop-blur-md border-white/10">
                     <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -20,7 +19,8 @@
                 </a>
 
                 <h1 class="hidden text-xl font-bold opacity-90 md:block">
-                    {{ $isEditing ? 'تعديل البيانات' : 'الملف الشخصي' }}</h1>
+                    {{ $isEditing ? 'تعديل البيانات' : 'الملف الشخصي' }}
+                </h1>
 
                 <button wire:click="toggleEdit"
                     class="flex items-center gap-2 px-5 py-3 text-base font-bold transition-colors border rounded-2xl bg-white/10 hover:bg-white/20 backdrop-blur-md border-white/10">
@@ -55,10 +55,54 @@
             <!-- Profile Content -->
             <div class="flex flex-col items-center transition-all md:flex-row md:items-start md:gap-10">
 
-                <!-- Avatar -->
-                <div
-                    class="flex items-center justify-center flex-shrink-0 w-32 h-32 mb-6 text-5xl font-black text-indigo-700 bg-white border-4 border-indigo-300 rounded-full shadow-2xl md:w-40 md:h-40 md:text-6xl md:mb-0">
-                    {{ mb_substr($member->name, 0, 1) }}
+                <!-- Avatar Section -->
+                <div class="flex flex-col items-center">
+                    <div
+                        class="relative flex items-center justify-center flex-shrink-0 w-32 h-32 mb-3 overflow-hidden text-5xl font-black text-indigo-700 bg-white border-4 border-indigo-300 rounded-full shadow-2xl md:w-40 md:h-40 md:text-6xl group">
+
+                        <!-- إظهار الصورة إذا تم اختيارها الآن (مؤقتة) -->
+                        @if ($photo)
+                            <img src="{{ $photo->temporaryUrl() }}" class="object-cover w-full h-full">
+                            <!-- إظهار الصورة المحفوظة في قاعدة البيانات -->
+                        @elseif ($member->photo_path)
+                            <img src="{{ asset('storage/' . $member->photo_path) }}" class="object-cover w-full h-full">
+                            <!-- الحرف الأول إذا لم توجد صورة -->
+                        @else
+                            {{ mb_substr($member->name, 0, 1) }}
+                        @endif
+
+                        <!-- طبقة التعديل (تظهر فقط في وضع التعديل) -->
+
+                        @if($isEditing)
+                            <label
+                                class="absolute inset-0 flex flex-col items-center justify-center text-white transition-opacity opacity-0 cursor-pointer bg-black/60 group-hover:opacity-100">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path
+                                        d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                                    <circle cx="12" cy="13" r="4" />
+                                </svg>
+                                <span class="mt-2 text-xs font-bold">تغيير الصورة</span>
+                                <input type="file" wire:model="photo" accept="image/*" class="hidden">
+                            </label>
+                        @endif
+                    </div>
+
+                    <!-- رسالة تحميل الصورة (Livewire) -->
+                    <div wire:loading wire:target="photo" class="mb-3 text-xs font-bold text-indigo-200 animate-pulse">
+                        جاري رفع الصورة...</div>
+
+                    <!-- رسالة خطأ الصورة -->
+                    @error('photo') <span class="mb-3 text-xs font-bold text-red-300">{{ $message }}</span> @enderror
+
+                    <!-- زر حذف الصورة -->
+                    @if($isEditing && $member->photo_path)
+                        <button wire:click="deletePhoto" wire:confirm="هل أنت متأكد من حذف الصورة؟"
+                            class="px-4 py-1.5 text-xs font-bold text-red-200 transition-colors bg-white/10 rounded-full hover:bg-red-500 hover:text-white mb-6 md:mb-0">
+                            حذف الصورة 🗑️
+                        </button>
+                    @endif
                 </div>
 
                 <!-- Info Section -->
@@ -87,7 +131,7 @@
                                 <label class="block text-sm font-bold text-right text-indigo-200">الكلية / العمل</label>
                                 <input type="text" wire:model="job_or_college"
                                     class="w-full p-4 text-lg font-bold text-indigo-900 bg-white border-0 shadow-sm rounded-xl focus:ring-4 focus:ring-indigo-400"
-                                    placeholder="العمل أو الدراسة">
+                                  placeholder="العمل أو الدراسة">
                             </div>
                             <div class="space-y-2">
                                 <label class="block text-sm font-bold text-right text-indigo-200">أب الاعتراف</label>
@@ -103,12 +147,14 @@
                             </div>
                             <button wire:click="saveProfile"
                                 class="flex items-center justify-center col-span-1 gap-2 py-4 mt-4 text-xl font-black text-white transition-all transform bg-green-500 shadow-lg md:col-span-2 hover:bg-green-600 rounded-xl active:scale-95">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="3">
+                                <span wire:loading.remove wire:target="saveProfile">حفظ التعديلات</span>
+                                <span wire:loading wire:target="saveProfile">جاري الحفظ...</span>
+                                <svg wire:loading.remove wire:target="saveProfile" xmlns="http://www.w3.org/2000/svg"
+                                    width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="3">
                                     <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
                                     <circle cx="12" cy="7" r="4" />
                                 </svg>
-                                حفظ التعديلات
                             </button>
                         </div>
                     @else
@@ -133,6 +179,7 @@
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                         fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
                                         stroke-linejoin="round" class="text-white">
+
                                         <path
                                             d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
                                     </svg>
@@ -198,6 +245,7 @@
             class="flex flex-wrap justify-between max-w-3xl gap-3 p-3 mx-auto overflow-x-auto bg-white border border-gray-100 shadow-xl rounded-2xl sm:flex-nowrap no-scrollbar">
             @php $periods = [4 => 'شهر', 12 => '3 شهور', 24 => '6 شهور', 52 => 'سنة']; @endphp
             @foreach($periods as $val => $label)
+
                 <button wire:click="setPeriod({{ $val }})"
                     class="flex-1 py-4 px-6 rounded-xl text-base font-black transition-all whitespace-nowrap {{ $period == $val ? 'bg-indigo-600 text-white shadow-lg transform scale-105' : 'text-gray-500 hover:bg-gray-100' }}">
                     {{ $label }}
@@ -255,6 +303,7 @@
                 <div class="pt-2">
                     <div class="mb-1 text-sm font-bold text-gray-500">مذبح عائلي</div>
                     <div class="text-2xl font-black text-gray-800">{{ $metrics['altar']['average'] }}%</div>
+
                 </div>
                 <div class="pt-2">
                     <div class="mb-1 text-sm font-bold text-gray-500">خلوة اسبوعية</div>
@@ -284,69 +333,70 @@
                         </div>
 
                         <div class="relative w-full h-56" x-data x-init='
-                                    if ($el.chart) { $el.chart.destroy(); }
-                                    $el.chart = new Chart($el.querySelector("canvas"), {
-                                        type: "line",
-                                        data: {
-                                            labels: @json($chartLabels),
-                                            datasets: [{
-                                                label: "{{ $metric["label"] }}",
-                                                data: @json($metric["trend"]),
-                                                borderColor: "{{ $metric["color"] }}",
-                                                backgroundColor: "{{ $metric["color"] }}15",
-                                                borderWidth: 3,
-                                                fill: true,
-                                                tension: 0.35,
-                                                pointRadius: 4,
-                                                pointHoverRadius: 6,
-                                                pointBackgroundColor: "#fff",
-                                                pointBorderColor: "{{ $metric["color"] }}",
-                                                pointBorderWidth: 2
-                                            }]
-                                        },
-                                        options: {
-                                            responsive: true,
-                                            maintainAspectRatio: false,
-                                            plugins: {
-                                                legend: { display: false },
-                                                tooltip: {
-                                                    backgroundColor: "rgba(255, 255, 255, 0.98)",
-                                                    titleColor: "#111827",
-                                                    bodyColor: "{{ $metric["color"] }}",
-                                                    borderColor: "#e5e7eb",
-                                                    borderWidth: 1,
-                                                    padding: 14,
-                                                    titleFont: { size: 14, weight: "bold", family: "sans-serif" },
-                                                    bodyFont: { size: 14, weight: "bold", family: "sans-serif" },
-                                                    displayColors: false,
-                                                    callbacks: {
-                                                        label: function(context) {
-                                                            return context.parsed.y + "%";
-                                                        }
-                                                    }
-                                                }
-                                            },
-                                            scales: {
-                                                y: {
-                                                    beginAtZero: true,
-                                                    max: 100,
-                                                    ticks: { stepSize: 25, font: { size: 12, weight: "bold" }, color: "#9ca3af" },
-                                                    grid: { color: "#f3f4f6" },
-                                                    border: { display: false }
-                                                },
-                                                x: {
-                                                    grid: { display: false },
-                                                    ticks: { font: { size: 11, weight: "bold" }, maxRotation: 0, autoSkip: true, maxTicksLimit: 6, color: "#9ca3af" },
-                                                    border: { display: false }
-                                                }
-                                            },
-                                            interaction: {
-                                                mode: "index",
-                                                intersect: false
-                                            }
-                                        }
-                                    });
-                                 '>
+                                                                    if ($el.chart) { $el.chart.destroy(); }
+                                                                    $el.chart = new Chart($el.querySelector("canvas"), {
+                                                                        type: "line",
+                                                                        data: {
+                                                                            labels: @json($chartLabels),
+                                                                            datasets: [{
+                                                                                label: "{{ $metric["label"] }}",
+                                                                                data: @json($metric["trend"]),
+                                                                                borderColor: "{{ $metric["color"] }}",
+                                                                                backgroundColor: "{{ $metric["color"] }}15",
+                                                                                borderWidth: 3,
+                                                                                fill: true,
+                                                                                tension: 0.35,
+                                                                                pointRadius: 4,
+                                                                                pointHoverRadius: 6,
+                                                                                pointBackgroundColor: "#fff",
+                                                                                pointBorderColor: "{{ $metric["color"] }}",
+                                                                                pointBorderWidth: 2
+                                                                            }]
+                                                                        },
+                                                                        options: {
+                                                                            responsive: true,
+                                                                            maintainAspectRatio: false,
+                                                                            plugins: {
+                                                                                legend: { display: false },
+                                                                                tooltip: {
+                                                                                    backgroundColor: "rgba(255, 255, 255, 0.98)",
+                                                                                    titleColor: "#111827",
+                                                                                    bodyColor: "{{ $metric["color"] }}",
+                                                                                    borderColor: "#e5e7eb",
+                                                                                    borderWidth: 1,
+                                                                                    padding: 14,
+                                                                                    titleFont: { size: 14, weight: "bold", family: "sans-serif" },
+
+                                bodyFont: { size: 14, weight: "bold", family: "sans-serif" },
+                                                                                    displayColors: false,
+                                                                                    callbacks: {
+                                                                                        label: function(context) {
+                                                                                            return context.parsed.y + "%";
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            },
+                                                                            scales: {
+                                                                                y: {
+                                                                                    beginAtZero: true,
+                                                                                    max: 100,
+                                                                                    ticks: { stepSize: 25, font: { size: 12, weight: "bold" }, color: "#9ca3af" },
+                                                                                    grid: { color: "#f3f4f6" },
+                                                                                    border: { display: false }
+                                                                                },
+                                                                                x: {
+                                                                                    grid: { display: false },
+                                                                                    ticks: { font: { size: 11, weight: "bold" }, maxRotation: 0, autoSkip: true, maxTicksLimit: 6, color: "#9ca3af" },
+                                                                                    border: { display: false }
+                                                                                }
+                                                                            },
+                                                                            interaction: {
+                                                                                mode: "index",
+                                                                                intersect: false
+                                                                            }
+                                                                        }
+                                                                    });
+                                                                 '>
                             <canvas></canvas>
                         </div>
                     </div>
@@ -380,6 +430,7 @@
                                 @if($record['present'])
                                     <span
                                         class="px-3 py-1 text-xs font-bold text-purple-700 border border-purple-100 rounded-lg bg-purple-50">
+
                                         نوتة: {{ $record['note'] }}
                                     </span>
                                 @else

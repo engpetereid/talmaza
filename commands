@@ -1,5 +1,6 @@
-/usr/local/lsws/lsphp82/bin/php artisan ...
+/usr/local/lsws/lsphp82/bin/php artisan
 
 
 /usr/local/lsws/lsphp82/bin/php composer.phar -v
 
+/usr/local/lsws/lsphp82/bin/php artisan app:open-new-week

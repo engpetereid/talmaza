@@ -17,7 +17,8 @@ class Member extends Model
         'birth_date',
         'job_or_college',
         'confession_father',
-        'talents'
+        'talents',
+        'photo_path'
     ];
 
     protected $casts = [

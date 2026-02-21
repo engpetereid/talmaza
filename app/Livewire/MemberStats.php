@@ -4,6 +4,8 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use Livewire\Attributes\Layout;
+use Livewire\WithFileUploads;
+use Illuminate\Support\Facades\Storage;
 use App\Models\Member;
 use App\Models\WeeklyMeeting;
 use App\Services\TatmimStatsService;
@@ -12,6 +14,8 @@ use Carbon\Carbon;
 #[Layout('layouts.app')]
 class MemberStats extends Component
 {
+    use WithFileUploads;
+
     public Member $member;
 
     public $isEditing = false;
@@ -21,6 +25,7 @@ class MemberStats extends Component
     public $job_or_college;
     public $confession_father;
     public $talents;
+    public $photo;
 
     public $period = 12;
 
@@ -50,6 +55,16 @@ class MemberStats extends Component
         $this->isEditing = !$this->isEditing;
         if (!$this->isEditing) {
             $this->mount($this->member);
+            $this->reset('photo');
+        }
+    }
+
+    public function deletePhoto()
+    {
+        if ($this->member->photo_path) {
+            Storage::disk('public')->delete($this->member->photo_path);
+            $this->member->update(['photo_path' => null]);
+            session()->flash('message', 'تم حذف الصورة بنجاح 🗑️');
         }
     }
 
@@ -62,18 +77,32 @@ class MemberStats extends Component
             'job_or_college' => 'nullable|string|max:255',
             'confession_father' => 'nullable|string|max:255',
             'talents' => 'nullable|string|max:500',
+            'photo' => 'nullable|image|max:5120',
+        ], [
+            'photo.image' => 'يجب أن يكون الملف المرفق صورة.',
+            'photo.max' => 'حجم الصورة يجب ألا يتجاوز 5 ميجا.',
         ]);
 
-        $this->member->update([
+        $dataToUpdate = [
             'name' => $this->name,
             'phone' => $this->phone,
             'birth_date' => $this->birth_date ?: null,
             'job_or_college' => $this->job_or_college,
             'confession_father' => $this->confession_father,
             'talents' => $this->talents,
-        ]);
+        ];
+
+        if ($this->photo) {
+            if ($this->member->photo_path) {
+                Storage::disk('public')->delete($this->member->photo_path);
+            }
+            $dataToUpdate['photo_path'] = $this->photo->store('member_photos', 'public');
+        }
+
+        $this->member->update($dataToUpdate);
 
         $this->isEditing = false;
+        $this->reset('photo');
         session()->flash('message', 'تم تحديث البيانات بنجاح ✅');
     }
 
@@ -94,6 +123,7 @@ class MemberStats extends Component
         $chartLabels = $meetings->pluck('week_date')->map(function ($date) {
             return Carbon::parse($date)->format('d/m');
         })->values()->toArray();
+
 
         $metrics = [
             'attendance' => ['label' => 'الحضور', 'color' => '#2563eb', 'total' => 0, 'trend' => []],
