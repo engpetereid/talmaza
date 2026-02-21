@@ -68,7 +68,6 @@
 
     <div class="px-4 py-8 mx-auto space-y-8 max-w-7xl sm:px-6 lg:px-8">
 
-
         <!-- Mobile Report Actions (Visible only on Mobile) -->
         <div class="grid grid-cols-2 gap-4 md:hidden">
             <a href="{{ route('admin.family.stats', $family->id) }}" wire:navigate
@@ -138,8 +137,13 @@
                             <!-- Avatar -->
                             <a href="{{ route('member.stats', $member->id) }}" wire:navigate class="flex-shrink-0 block">
                                 <div
-                                    class="w-16 h-16 rounded-2xl flex items-center justify-center font-black text-2xl shadow-sm border-2 {{ $member->is_active ? 'bg-indigo-50 text-indigo-600 border-indigo-100' : 'bg-gray-200 text-gray-400 border-gray-300' }}">
-                                    {{ mb_substr($member->name, 0, 1) }}
+                                    class="w-16 h-16 rounded-2xl flex items-center justify-center font-black text-2xl shadow-sm border-2 overflow-hidden transition-colors {{ $member->is_active ? 'bg-indigo-50 text-indigo-600 border-indigo-100 group-hover:bg-indigo-600 group-hover:text-white' : 'bg-gray-200 text-gray-400 border-gray-300' }}">
+                                    @if($member->photo_path)
+                                        <img src="{{ asset('storage/' . $member->photo_path) }}" alt="{{ $member->name }}"
+                                            class="object-cover w-full h-full">
+                                    @else
+                                        {{ mb_substr($member->name, 0, 1) }}
+                                    @endif
                                 </div>
                             </a>
 
@@ -307,10 +311,9 @@
                             </div>
 
                             <div>
-                                <h4
-                                    class="text-base font-bold text-gray-800 transition-colors group-hover:text-indigo-600">
+                                <h4 class="text-base font-bold text-gray-800 transition-colors group-hover:text-indigo-600">
 
-{{ $report->type == 'weekly' ? 'تقرير أسبوعي' : 'تقرير شهري' }}
+                                    {{ $report->type == 'weekly' ? 'تقرير أسبوعي' : 'تقرير شهري' }}
                                 </h4>
                                 <div class="flex items-center gap-2 mt-1 text-xs font-medium text-gray-500">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
@@ -373,8 +376,7 @@
                     stroke="currentColor" stroke-width="2.5">
                     <path d="M3 6h18" />
                     <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-
-<path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
                 </svg>
                 حذف العائلة نهائياً
             </button>
