@@ -140,7 +140,7 @@
                             </div>
 
                             <!-- Resources List -->
-                            <div class="pb-8 space-y-6">
+                            <div class="pb-20 space-y-40">
                                 <h3 class="flex items-center gap-3 text-xl font-bold text-gray-800">
                                     <span class="w-2 h-8 bg-indigo-600 rounded-full"></span>
                                     مشاركات القادة ({{ $activeLesson->resources->count() }})
