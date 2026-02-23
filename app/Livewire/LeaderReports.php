@@ -43,6 +43,24 @@ class LeaderReports extends Component
         }
     }
 
+    /**
+     * Delete a specific report
+     */
+    public function deleteReport($id)
+    {
+        if ($this->isLocked) return;
+
+        // Ensure the report belongs to the current user's family
+        $report = Report::where('id', $id)
+            ->where('family_id', Auth::user()->family_id)
+            ->first();
+
+        if ($report) {
+            $report->delete();
+            session()->flash('message', 'تم حذف التقرير بنجاح 🗑️');
+        }
+    }
+
     public function render()
     {
         $reports = [];

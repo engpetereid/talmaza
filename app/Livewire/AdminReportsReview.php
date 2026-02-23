@@ -20,13 +20,25 @@ class AdminReportsReview extends Component
         $this->resetPage(); // الرجوع للصفحة الأولى عند تغيير الفلتر
     }
 
+    /**
+     * Delete a specific report
+     */
+    public function deleteReport($id)
+    {
+        $report = Report::find($id);
+
+        if ($report) {
+            $report->delete();
+            session()->flash('message', 'تم حذف التقرير بنجاح 🗑️');
+        }
+    }
+
     public function render()
     {
         $query = Report::with('family')->latest('report_date');
 
         // تطبيق الفلاتر
         if ($this->filter == 'pending') {
-
             $query->whereNull('admin_reply_at');
         } elseif ($this->filter == 'weekly') {
             $query->where('type', 'weekly');
@@ -35,7 +47,6 @@ class AdminReportsReview extends Component
         }
 
         return view('livewire.admin-reports-review', [
-           
             'reports' => $query->paginate(12)
         ]);
     }

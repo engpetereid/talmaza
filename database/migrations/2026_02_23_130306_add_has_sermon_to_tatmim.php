@@ -11,8 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('members', function (Blueprint $table) {
-            $table->string(column: 'photo_path')->nullable()->after('name');
+        Schema::table('tatmim_records', function (Blueprint $table) {
+            //
+            $table->boolean(column: 'has_sermon')->default(false)->after('has_family_altar');
         });
     }
 
@@ -21,8 +22,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('members', function (Blueprint $table) {
-            $table->dropColumn('photo_path');
+        Schema::table('tatmim_records', function (Blueprint $table) {
+            //
+            $table->dropColumn('has_sermon');
         });
     }
 };

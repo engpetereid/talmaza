@@ -175,6 +175,7 @@
                                            wire:model.blur="records.{{ $member->id }}.kholwa_count"
                                            class="block w-full p-4 text-2xl font-black text-center text-gray-900 bg-white border-2 border-gray-300 rounded-2xl focus:ring-orange-500 focus:border-orange-500">
                                 </div>
+
                             </div>
 
                             <!-- Toggles Grid -->
@@ -188,7 +189,8 @@
                                         'has_servants_meeting' => ['label' => 'اجتماع الخدام', 'icon' => '🤝'],
                                         'has_reading' => ['label' => 'قراءة', 'icon' => '📖'],
                                         'has_family_altar' => ['label' => 'مذبح', 'icon' => '👨‍👩‍👧‍👦'],
-                                    ];
+                                        'has_sermon' => ['label' => 'عظة', 'icon' => '📺'],
+                                        ];
                                 @endphp
 
                                 @foreach($toggles as $field => $data)

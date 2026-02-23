@@ -36,7 +36,7 @@
                             <line x1="12" y1="20" x2="12" y2="4" />
                             <line x1="6" y1="20" x2="6" y2="14" />
                         </svg>
-                        تقارير النسب الشهرية
+                        النسب الشهرية
                     </a>
                     <a href="{{ route('admin.family.stage_stats', $family->id) }}" wire:navigate
                         class="flex items-center gap-2 px-5 py-3 font-bold text-orange-600 transition-all bg-white border-2 border-orange-100 hover:border-orange-200 hover:bg-orange-50 rounded-xl">
@@ -46,8 +46,7 @@
                             <path
                                 d="M20 21a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3zm2-5a2 2 0 0 0-2-2h-2V8a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v4H4a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2z" />
                         </svg>
-                        تقارير المنهج
-                    </a>
+                        نسب المرحلة </a>
 
                     <!-- Desktop Delete Button -->
                     <button wire:click="deleteFamily"
@@ -80,7 +79,7 @@
                         <line x1="6" y1="20" x2="6" y2="14" />
                     </svg>
                 </div>
-                <span class="text-sm font-bold text-gray-800">النسب الشهرية</span>
+                <span class="text-sm font-bold text-gray-800">نسب الشهر</span>
             </a>
             <a href="{{ route('admin.family.stage_stats', $family->id) }}" wire:navigate
                 class="flex flex-col items-center justify-center gap-2 p-4 text-center transition-colors bg-white border border-orange-100 shadow-sm rounded-2xl hover:bg-orange-50">
@@ -92,7 +91,7 @@
                             d="M20 21a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3zm2-5a2 2 0 0 0-2-2h-2V8a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v4H4a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2z" />
                     </svg>
                 </div>
-                <span class="text-sm font-bold text-gray-800">تقارير المنهج</span>
+                <span class="text-sm font-bold text-gray-800">نسب المرحلة</span>
             </a>
         </div>
 

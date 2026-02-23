@@ -229,12 +229,12 @@
                         <div class="grid grid-cols-2 gap-4 mb-8 md:grid-cols-4">
                             <div class="p-4 text-center border bg-white/10 rounded-2xl backdrop-blur-md border-white/10"><span class="block mb-1 text-3xl font-black">{{ $stats_snapshot['attendance'] ?? 0 }}%</span><span class="text-xs font-bold uppercase opacity-70">الحضور</span></div>
                             <div class="p-4 text-center border bg-white/10 rounded-2xl backdrop-blur-md border-white/10"><span class="block mb-1 text-3xl font-black">{{ $stats_snapshot['note'] ?? 0 }}%</span><span class="text-xs font-bold uppercase opacity-70">النوتة</span></div>
-                            <div class="p-4 text-center border bg-white/10 rounded-2xl backdrop-blur-md border-white/10"><span class="block mb-1 text-3xl font-black">{{ $stats_snapshot['kholwa'] ?? 0 }}%</span><span class="text-xs font-bold uppercase opacity-70">الخلوة</span></div>
-                            <div class="p-4 text-center border bg-white/10 rounded-2xl backdrop-blur-md border-white/10"><span class="block mb-1 text-3xl font-black ">{{ $stats_snapshot['training'] ?? 0 }}%</span><span class="text-xs font-bold text-yellow-100 uppercase opacity-70">التدريب</span></div>
+                            <div class="p-4 text-center border bg-white/10 rounded-2xl backdrop-blur-md border-white/10"><span class="block mb-1 text-3xl font-black">{{ $stats_snapshot['kholwa'] ?? 0 }}%</span><span class="text-xs font-bold uppercase opacity-70">مشاركة الخلوة</span></div>
+                            <div class="p-4 text-center border bg-white/10 rounded-2xl backdrop-blur-md border-white/10"><span class="block mb-1 text-3xl font-black ">{{ $stats_snapshot['training'] ?? 0 }}%</span><span class="text-xs font-bold uppercase opacity-70">تدريب التلمذة</span></div>
                             <div class="p-3 text-center border bg-white/5 rounded-xl border-white/5"><span class="block text-xl font-bold">{{ $stats_snapshot['mass'] ?? 0 }}%</span><span class="text-[10px] opacity-60 font-bold">القداس</span></div>
-                            <div class="p-3 text-center border bg-white/5 rounded-xl border-white/5"><span class="block text-xl font-bold">{{ $stats_snapshot['vespers'] ?? 0 }}%</span><span class="text-[10px] opacity-60 font-bold">عشية</span></div>
+                            <div class="p-3 text-center border bg-white/5 rounded-xl border-white/5"><span class="block text-xl font-bold">{{ $stats_snapshot['vespers'] ?? 0 }}%</span><span class="text-[10px] opacity-60 font-bold">عشية وتسبيحة</span></div>
                             <div class="p-3 text-center border bg-white/5 rounded-xl border-white/5"><span class="block text-xl font-bold">{{ $stats_snapshot['reading'] ?? 0 }}%</span><span class="text-[10px] opacity-60 font-bold">قراءة</span></div>
-                            <div class="p-3 text-center border bg-white/5 rounded-xl border-white/5"><span class="block text-xl font-bold">{{ $stats_snapshot['altar'] ?? 0 }}%</span><span class="text-[10px] opacity-60 font-bold">مذبح</span></div>
+                            <div class="p-3 text-center border bg-white/5 rounded-xl border-white/5"><span class="block text-xl font-bold">{{ $stats_snapshot['altar'] ?? 0 }}%</span><span class="text-[10px] opacity-60 font-bold">مذبح عائلى</span></div>
                         </div>
 
                         <!-- Detailed Table -->
@@ -247,12 +247,13 @@
                                             <th class="p-4">حضور</th>
                                             <th class="p-4">نوتة</th>
                                             <th class="p-4">قداس</th>
-                                            <th class="p-4">عشية</th>
-                                            <th class="p-4">خلوة</th>
+                                            <th class="p-4">عشية وتسبحة</th>
+                                            <th class="p-4">مشاركة الخلوة</th>
                                             <th class="p-4">قراءة</th>
-                                            <th class="p-4">تدريب</th>
-                                            <th class="p-4">مذبح</th>
-                                            <th class="p-4">اسبوعية</th>
+                                            <th class="p-4">تدريب التلمذة</th>
+                                            <th class="p-4">مذبح عائلى</th>
+                                            <th class="p-4">خلوة اسبوعية</th>
+                                            <th class="p-4">سماع العظة</th>
                                         </tr>
                                     </thead>
                                     <tbody class="font-medium divide-y divide-white/10 text-white/90">
@@ -268,6 +269,7 @@
                                                 <td class="p-3 font-bold text-yellow-300">{{ $stat['talmaza_training_count'] }}%</td>
                                                 <td class="p-3">{{ $stat['has_family_altar'] }}%</td>
                                                 <td class="p-3">{{ $stat['has_weekly_kholwa'] }}%</td>
+                                                <td class="p-3">{{ $stat['has_sermon'] }}%</td>
                                             </tr>
                                         @endforeach
                                     </tbody>

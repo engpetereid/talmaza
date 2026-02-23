@@ -135,6 +135,10 @@
                                 <div class="text-[10px] text-gray-400 font-bold">خلوة أسبوعية</div>
                                 <div class="text-sm font-bold text-gray-700">{{ $stat['weekly_kholwa'] }}%</div>
                             </div>
+                            <div class="col-span-1 pt-2 mt-2 border-t border-gray-50">
+                                <div class="text-[10px] text-gray-400 font-bold">سماع العظة</div>
+                                <div class="text-sm font-bold text-gray-700">{{ $stat['has_sermon'] }}%</div>
+                            </div>
                         </div>
                     </div>
                 @endforeach

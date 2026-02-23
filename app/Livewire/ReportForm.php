@@ -169,6 +169,7 @@ class ReportForm extends Component
             'mass' => 0,
             'vespers' => 0,
             'tasbeha' => 0,
+            'sermon' => 0,
             'servants' => 0,
             'reading' => 0,
             'altar' => 0,
@@ -186,6 +187,7 @@ class ReportForm extends Component
                 'has_servants_meeting' => 0,
                 'has_tasbeha' => 0,
                 'has_reading' => 0,
+                'has_sermon' => 0,
                 'has_family_altar' => 0,
                 'kholwa_count' => 0,
                 'talmaza_training_count' => 0,
@@ -232,6 +234,10 @@ class ReportForm extends Component
                         $memberStats['has_weekly_kholwa']++;
                         if ($record->is_present) $globalSums['weekly_kholwa']++;
                     }
+                    if ($record->has_sermon) {
+                        $memberStats['has_sermon']++;
+                        if ($record->is_present) $globalSums['sermon']++;
+                    }
 
                     $memberStats['kholwa_count'] += min($record->kholwa_count / 7, 1);
                     if ($record->kholwa_count > 3 && $record->is_present) $globalSums['kholwa']++;
@@ -256,7 +262,7 @@ class ReportForm extends Component
         $avgs['attendance'] = round(($globalSums['attendance'] / $totalOpp) * 100);
         $avgs['note'] = $totalPresentCount > 0 ? round(($globalSums['note'] / $totalPresentCount) * 100) : 0;
 
-        $keys = ['kholwa', 'training', 'weekly_kholwa', 'mass', 'vespers', 'servants', 'reading', 'altar'];
+        $keys = ['kholwa', 'training', 'weekly_kholwa', 'mass', 'vespers', 'servants', 'reading', 'altar', 'tasbeha' ,'sermon'];
         foreach ($keys as $k) {
             $srcKey = $k == 'vespers' ? 'vespers' : $k;
             $avgs[$k] = round(($globalSums[$srcKey] / $totalOpp) * 100);

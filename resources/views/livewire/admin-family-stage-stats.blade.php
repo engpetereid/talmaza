@@ -184,28 +184,32 @@
                             <div class="col-span-4 my-1 border-t border-gray-100 sm:col-span-5"></div>
 
                             <div class="col-span-1">
-                                <div class="text-[9px] text-gray-400">مشاركة الخلوة</div>
+                                <div class="text-[9px] text-gray-400 font-bold">مشاركة الخلوة</div>
                                 <div class="text-xs font-bold">{{ $stat['kholwa'] }}%</div>
                             </div>
                             <div class="col-span-1">
-                                <div class="text-[9px] text-gray-400">تسبحة</div>
+                                <div class="text-[9px] text-gray-400 font-bold">تسبحة</div>
                                 <div class="text-xs font-bold">{{ $stat['tasbeha'] }}%</div>
                             </div>
                             <div class="col-span-1">
-                                <div class="text-[9px] text-gray-400">اجتماع خدام</div>
+                                <div class="text-[9px] text-gray-400 font-bold">اجتماع خدام</div>
                                 <div class="text-xs font-bold">{{ $stat['servants'] }}%</div>
                             </div>
                             <div class="col-span-1">
-                                <div class="text-[9px] text-gray-400">مذبح عائلى</div>
+                                <div class="text-[9px] text-gray-400 font-bold">مذبح عائلى</div>
                                 <div class="text-xs font-bold">{{ $stat['altar'] }}%</div>
                             </div>
-                            <div class="col-span-1 sm:hidden">
-                                <div class="text-[9px] text-gray-400">قراءة</div>
+                            <div class="col-span-1 ">
+                                <div class="text-[9px] text-gray-400 font-bold">قراءة</div>
                                 <div class="text-xs font-bold">{{ $stat['reading'] }}%</div>
                             </div>
-                            <div class="hidden col-span-1 sm:block">
-                                <div class="text-[9px] text-gray-400">خلوه أسبوعية</div>
+                            <div class="col-span-1">
+                                <div class="text-[9px] text-gray-400 font-bold">خلوه أسبوعية</div>
                                 <div class="text-xs font-bold">{{ $stat['weekly_kholwa'] }}%</div>
+                            </div>
+                            <div class="col-span-1 ">
+                                <div class="text-[9px] text-gray-400 font-bold">سماع العظة</div>
+                                <div class="text-xs font-bold ">{{ $stat['has_sermon'] }}%</div>
                             </div>
                         </div>
                     </div>

@@ -136,6 +136,7 @@ class MemberStats extends Component
             'weekly_kholwa' => ['label' => 'خلوة أسبوعية', 'color' => '#db2777', 'total' => 0, 'trend' => []],
             'kholwa' => ['label' => 'مشاركة خلوة', 'color' => '#d97706', 'total' => 0, 'trend' => []],
             'training' => ['label' => 'تدريب تلمذة', 'color' => '#ca8a04', 'total' => 0, 'trend' => []],
+            'sermon' => ['label' => 'سماع العظة', 'color' => '#16a34a', 'total' => 0, 'trend' => []],
         ];
 
         $history = [];
@@ -156,6 +157,7 @@ class MemberStats extends Component
                 $calculatedScores['reading'] = $record->has_reading ? 100 : 0;
                 $calculatedScores['altar'] = $record->has_family_altar ? 100 : 0;
                 $calculatedScores['weekly_kholwa'] = $record->has_weekly_kholwa ? 100 : 0;
+                $calculatedScores['sermon'] = $record->has_sermon ? 100 : 0;
 
                 // 2. Gradient Metrics (Calculated)
                 $maxNote = max($meeting->max_note_score, 1);

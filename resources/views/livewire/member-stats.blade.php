@@ -309,6 +309,11 @@
                     <div class="mb-1 text-sm font-bold text-gray-500">خلوة اسبوعية</div>
                     <div class="text-2xl font-black text-gray-800">{{ $metrics['weekly_kholwa']['average'] }}%</div>
                 </div>
+                <div class="pt-2">
+                    <div class="mb-1 text-sm font-bold text-gray-500">سماع العظه</div>
+                    <div class="text-2xl font-black text-gray-800">{{ $metrics['sermon']['average'] }}%</div>
+                </div>
+
             </div>
         </div>
 

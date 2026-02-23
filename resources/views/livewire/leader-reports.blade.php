@@ -61,6 +61,13 @@
 
         <!-- STATE 2: REPORTS DASHBOARD (UNLOCKED) -->
         @else
+            @if (session()->has('message'))
+                <div class="flex items-center gap-3 p-4 mb-6 font-bold text-green-800 bg-green-100 border-r-4 border-green-500 shadow-sm rounded-xl animate-fade-in-down">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    {{ session('message') }}
+                </div>
+            @endif
+
             <!-- Action Buttons Grid -->
             <div class="grid grid-cols-1 gap-6 mb-10 sm:grid-cols-2 animate-fade-in-down">
                 <!-- Weekly Report Button -->
@@ -98,39 +105,48 @@
 
                 <div class="divide-y divide-gray-100">
                     @forelse($reports as $report)
-                        <a href="{{ route('report.view', $report->id) }}" wire:navigate class="block p-5 transition-colors hover:bg-indigo-50/50 group">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-12 h-12 rounded-xl flex items-center justify-center text-xl shadow-sm border border-gray-100 {{ $report->type == 'weekly' ? 'bg-indigo-100 text-indigo-600' : 'bg-orange-100 text-orange-600' }}">
-                                        {{ $report->type == 'weekly' ? '📅' : '📊' }}
-                                    </div>
-                                    <div>
-                                        <h4 class="mb-1 text-base font-bold text-gray-800 transition-colors group-hover:text-indigo-700">
-                                            {{ $report->type == 'weekly' ? 'تقرير أسبوعي' : 'تقرير شهري' }}
-                                        </h4>
-                                        <div class="flex items-center gap-2 text-xs font-bold text-gray-400">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                                            {{ \Carbon\Carbon::parse($report->report_date)->locale('ar')->isoFormat('D MMMM YYYY') }}
-                                        </div>
-                                    </div>
-                                </div>
+                        <div class="flex items-center justify-between p-5 transition-colors hover:bg-indigo-50/50 group">
 
-                                <!-- Status Badge -->
-                                <div>
-                                    @if($report->admin_reply_at)
-                                        <span class="inline-flex items-center gap-1 bg-green-100 text-green-700 text-xs font-bold px-3 py-1.5 rounded-full border border-green-200">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-                                            <span class="hidden sm:inline">تم الرد</span>
-                                        </span>
-                                    @else
-                                        <span class="inline-flex items-center gap-1 bg-gray-100 text-gray-500 text-xs font-bold px-3 py-1.5 rounded-full border border-gray-200">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                                            <span class="hidden sm:inline">قيد المراجعة</span>
-                                        </span>
-                                    @endif
+                            <!-- Left Area (Clickable Link) -->
+                            <a href="{{ route('report.view', $report->id) }}" wire:navigate class="flex items-center flex-grow gap-4">
+                                <div class="w-12 h-12 rounded-xl flex items-center justify-center text-xl shadow-sm border border-gray-100 {{ $report->type == 'weekly' ? 'bg-indigo-100 text-indigo-600' : 'bg-orange-100 text-orange-600' }}">
+                                    {{ $report->type == 'weekly' ? '📅' : '📊' }}
                                 </div>
+                                <div>
+                                    <h4 class="mb-1 text-base font-bold text-gray-800 transition-colors group-hover:text-indigo-700">
+                                        {{ $report->type == 'weekly' ? 'تقرير أسبوعي' : 'تقرير شهري' }}
+                                    </h4>
+                                    <div class="flex items-center gap-2 text-xs font-bold text-gray-400">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                        {{ \Carbon\Carbon::parse($report->report_date)->locale('ar')->isoFormat('D MMMM YYYY') }}
+                                    </div>
+                                </div>
+                            </a>
+
+                            <!-- Right Area (Status & Delete) -->
+                            <div class="flex items-center gap-3">
+                                <!-- Status Badge -->
+                                @if($report->admin_reply_at)
+                                    <span class="inline-flex items-center gap-1 bg-green-100 text-green-700 text-xs font-bold px-3 py-1.5 rounded-full border border-green-200">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                                        <span class="hidden sm:inline">تم الرد</span>
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1 bg-gray-100 text-gray-500 text-xs font-bold px-3 py-1.5 rounded-full border border-gray-200">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                        <span class="hidden sm:inline">قيد المراجعة</span>
+                                    </span>
+                                @endif
+
+                                <!-- Delete Button -->
+                                <button wire:click="deleteReport({{ $report->id }})"
+                                        wire:confirm="هل أنت متأكد من حذف هذا التقرير بشكل نهائي؟"
+                                        class="flex items-center justify-center w-10 h-10 text-gray-400 transition-colors rounded-xl hover:text-red-600 hover:bg-red-50"
+                                        title="حذف التقرير">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                                </button>
                             </div>
-                        </a>
+                        </div>
                     @empty
                         <div class="py-16 text-center">
                             <div class="flex items-center justify-center w-16 h-16 mx-auto mb-4 text-3xl rounded-full bg-gray-50 grayscale opacity-30">📭</div>

@@ -23,7 +23,8 @@ class TatmimRecord extends Model
         'kholwa_count',
         'comments',
         'talmaza_training_count',
-        'has_weekly_kholwa'
+        'has_weekly_kholwa',
+        'has_sermon'
     ];
 
     protected $casts = [
@@ -35,6 +36,7 @@ class TatmimRecord extends Model
         'has_reading' => 'boolean',
         'has_family_altar' => 'boolean',
         'has_weekly_kholwa' => 'boolean',
+        'has_sermon' => 'boolean',
     ];
 
     public function weeklyMeeting()

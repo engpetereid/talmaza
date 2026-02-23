@@ -59,6 +59,7 @@ class TatmimStatsService
             'reading' => $record->has_reading ? 100 : 0,
             'altar' => $record->has_family_altar ? 100 : 0,
             'weekly_kholwa' => $record->has_weekly_kholwa ? 100 : 0,
+            'has_sermon' => $record->has_sermon ? 100 : 0,
 
             // Gradient Fields (Calculated Percentage 0-100)
             'note' => ($record->note_score / $maxNote) * 100,
@@ -75,6 +76,7 @@ class TatmimStatsService
             'kholwa' => 0,
             'training' => 0,
             'weekly_kholwa' => 0,
+            'has_sermon' => 0,
             'mass' => 0,
             'tasbeha' => 0,
             'servants' => 0,

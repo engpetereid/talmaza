@@ -30,6 +30,7 @@ class AdminFamilyStats extends Component
         'reading' => ['label' => 'قراءة', 'color' => '#0d9488'],
         'altar' => ['label' => 'مذبح', 'color' => '#dc2626'],
         'weekly_kholwa' => ['label' => 'خلوة أسبوعية', 'color' => '#be185d'],
+        'has_sermon' => ['label' => 'سماع العظة', 'color' => '#db2777'],
     ];
 
     public function mount(Family $family)
@@ -94,6 +95,7 @@ class AdminFamilyStats extends Component
                     if ($record->has_servants_meeting) $meetingSums['servants'] += 100;
                     if ($record->has_reading) $meetingSums['reading'] += 100;
                     if ($record->has_family_altar) $meetingSums['altar'] += 100;
+                    if ($record->has_sermon) $meetingSums['has_sermon'] += 100;
 
                     // Gradient/Calculated Metrics
                     $meetingSums['note'] += ($record->note_score / $maxNote) * 100;
@@ -126,6 +128,7 @@ class AdminFamilyStats extends Component
                     if ($record->has_servants_meeting) $counters['servants'] += 100;
                     if ($record->has_reading) $counters['reading'] += 100;
                     if ($record->has_family_altar) $counters['altar'] += 100;
+                    if ($record->has_sermon) $counters['has_sermon'] += 100;
 
                     $counters['note'] += ($record->note_score / $maxNote) * 100;
                     $counters['kholwa'] += min(($record->kholwa_count / 7) * 100, 100);

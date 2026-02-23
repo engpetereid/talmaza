@@ -137,51 +137,55 @@
                         <!-- شبكة التفاصيل -->
                         <div class="grid grid-cols-4 gap-2 p-3 text-center sm:grid-cols-5">
                             <div class="col-span-1 p-1 rounded-lg bg-blue-50">
-                                <div class="text-[9px] text-gray-900">حضور</div>
+                                <div class="text-[9px] text-gray-900 font-bold">حضور</div>
                                 <div class="text-xs font-bold text-blue-700">{{ $stat['attendance'] }}%</div>
                             </div>
                             <div class="col-span-1 p-1 rounded-lg bg-purple-50">
-                                <div class="text-[9px] text-gray-900">نوتة</div>
+                                <div class="text-[9px] text-gray-900 font-bold">نوتة</div>
                                 <div class="text-xs font-bold text-purple-700">{{ $stat['note'] }}%</div>
                             </div>
                             <div class="col-span-1 p-1 rounded-lg bg-orange-50">
-                                <div class="text-[9px] text-gray-900">القداس</div>
+                                <div class="text-[9px] text-gray-900 font-bold">القداس</div>
                                 <div class="text-xs font-bold text-orange-700">{{ $stat['mass'] }}%</div>
                             </div>
                             <div class="col-span-1 p-1 rounded-lg bg-pink-50">
-                                <div class="text-[9px] text-gray-900">تدريب التلمذة</div>
+                                <div class="text-[9px] text-gray-900 font-bold">تدريب التلمذة</div>
                                 <div class="text-xs font-bold text-pink-700">{{ $stat['training'] }}%</div>
                             </div>
                             <div class="hidden col-span-1 p-1 rounded-lg bg-teal-50 sm:block">
-                                <div class="text-[9px] text-gray-900">قراءة</div>
+                                <div class="text-[9px] text-gray-900 font-bold">قراءة</div>
                                 <div class="text-xs font-bold text-teal-700">{{ $stat['reading'] }}%</div>
                             </div>
 
                             <div class="col-span-4 my-1 border-t border-gray-100 sm:col-span-5"></div>
 
                             <div class="col-span-1">
-                                <div class="text-[9px] text-gray-900">مشاركة الخلوة</div>
+                                <div class="text-[9px] text-gray-900 font-bold">مشاركة الخلوة</div>
                                 <div class="text-xs font-bold">{{ $stat['kholwa'] }}%</div>
                             </div>
                             <div class="col-span-1">
-                                <div class="text-[9px] text-gray-900">تسبحة</div>
+                                <div class="text-[9px] text-gray-900 font-bold">تسبحة</div>
                                 <div class="text-xs font-bold">{{ $stat['vespers'] }}%</div>
                             </div>
                             <div class="col-span-1">
-                                <div class="text-[9px] text-gray-900">اجتماع الخدام</div>
+                                <div class="text-[9px] text-gray-900 font-bold">اجتماع الخدام</div>
                                 <div class="text-xs font-bold">{{ $stat['servants'] }}%</div>
                             </div>
                             <div class="col-span-1">
-                                <div class="text-[9px] text-gray-900">مذبح عائلى</div>
+                                <div class="text-[9px] text-gray-900 font-bold">مذبح عائلى</div>
                                 <div class="text-xs font-bold">{{ $stat['altar'] }}%</div>
                             </div>
                             <div class="col-span-1 sm:hidden">
-                                <div class="text-[9px] text-gray-900">قراءة</div>
+                                <div class="text-[9px] text-gray-900 font-bold">قراءة</div>
                                 <div class="text-xs font-bold">{{ $stat['reading'] }}%</div>
                             </div>
-                            <div class="hidden col-span-1 sm:block">
-                                <div class="text-[9px] text-gray-900">خلوة أسبوعية</div>
+                            <div class="col-span-1 ">
+                                <div class="text-[9px] text-gray-900 font-bold">خلوة أسبوعية</div>
                                 <div class="text-xs font-bold">{{ $stat['weekly_kholwa'] }}%</div>
+                            </div>
+                            <div class="col-span-1 ">
+                                <div class="text-[9px] text-gray-900 font-bold">سماع العظة</div>
+                                <div class="text-xs font-bold ">{{ $stat['has_sermon'] }}%</div>
                             </div>
                         </div>
                     </div>
