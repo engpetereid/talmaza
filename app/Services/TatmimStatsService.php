@@ -54,7 +54,7 @@ class TatmimStatsService
             'attendance' => $record->is_present ? 100 : 0,
             'mass' => $record->has_mass ? 100 : 0,
             // Check both columns if vespers was renamed or keep single if cleaned up
-            'tasbeha' => ($record->has_vespers ?? false || $record->has_tasbeha) ? 100 : 0,
+            'tasbeha' =>  $record->has_tasbeha ? 100 : 0,
             'servants' => $record->has_servants_meeting ? 100 : 0,
             'reading' => $record->has_reading ? 100 : 0,
             'altar' => $record->has_family_altar ? 100 : 0,

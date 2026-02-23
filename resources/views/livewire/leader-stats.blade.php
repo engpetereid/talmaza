@@ -114,7 +114,7 @@
                                 <div class="text-sm font-black text-orange-700">{{ $stat['mass'] }}%</div>
                             </div>
                             <div class="p-2 border border-pink-100 bg-pink-50 rounded-2xl">
-                                <div class="text-[10px] text-gray-500 font-bold mb-1">تدريب تلمذة</div>
+                                <div class="text-[10px] text-gray-500 font-bold mb-1">تدريب التلمذة</div>
                                 <div class="text-sm font-black text-pink-700">{{ $stat['training'] }}%</div>
                             </div>
 
