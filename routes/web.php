@@ -37,7 +37,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/reports/view/{report}', ReportForm::class)->name('report.view');
 
 
-    Route::get('/reports', LeaderReports::class)->name('leader.reports'); 
+    Route::get('/reports', LeaderReports::class)->name('leader.reports');
     Route::get('/my-family', MyFamily::class)->name('my-family');
     Route::get('/meeting/{meeting}/record', RecordTatmim::class)->name('meeting.record');
     Route::get('/stats', LeaderStats::class)->name('stats');
@@ -57,6 +57,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/reports-review', AdminReportsReview::class)->name('reports');
     });
     Route::get('/about-me', AboutMe::class)->name('about-me');
+    Route::post('/save-fcm-token', function (\Illuminate\Http\Request $request) {
+        if (auth()->check()) {
+            auth()->user()->update(['fcm_token' => $request->token]);
+            return response()->json(['message' => 'Token saved successfully']);
+        }
+        return response()->json(['message' => 'Unauthenticated'], 401);
+    });
 
 });
 

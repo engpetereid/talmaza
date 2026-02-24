@@ -22,6 +22,7 @@ class User extends Authenticatable
         'role',
         'family_id',
         'report_pin',
+        'fcm_token'
     ];
 
     /**
@@ -32,7 +33,7 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
-        'report_pin', 
+        'report_pin',
     ];
 
     /**
