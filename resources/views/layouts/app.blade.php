@@ -307,64 +307,66 @@
 
         </div>
     </div>
-    <script type="module">
-        import { initializeApp } from "[https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js](https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js)";
-        import { getMessaging, getToken, onMessage } from "[https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js](https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js)";
+    <!-- FIREBASE PUSH NOTIFICATION SCRIPT -->
+    @if(Auth::check())
+        <script type="module">
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+            import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
 
-        // 1. Your Firebase Config
-        const firebaseConfig = {
-            apiKey: "AIzaSyB1EIwyQAuVb2D8m2zzQ6hTDZyp9_sJ5OI",
-            authDomain: "talmaza-dc8e8.firebaseapp.com",
-            projectId: "talmaza-dc8e8",
-            storageBucket: "talmaza-dc8e8.firebasestorage.app",
-            messagingSenderId: "1015353162177",
-            appId: "1:1015353162177:web:91b8158f1311cd3e50d740",
-            measurementId: "G-SK6VVWVPRR"
-        };
+            // 1. Your Firebase Config
+            const firebaseConfig = {
+                apiKey: "AIzaSyB1EIwyQAuVb2D8m2zzQ6hTDZyp9_sJ5OI",
+                authDomain: "talmaza-dc8e8.firebaseapp.com",
+                projectId: "talmaza-dc8e8",
+                storageBucket: "talmaza-dc8e8.firebasestorage.app",
+                messagingSenderId: "1015353162177",
+                appId: "1:1015353162177:web:91b8158f1311cd3e50d740",
+                measurementId: "G-SK6VVWVPRR"
+            };
 
-        const app = initializeApp(firebaseConfig);
-        const messaging = getMessaging(app);
+            const app = initializeApp(firebaseConfig);
+            const messaging = getMessaging(app);
 
-        // 2. Request Permission & Get Token
-        function requestPushPermission() {
-            Notification.requestPermission().then((permission) => {
-                if (permission === 'granted') {
-                    getToken(messaging, { vapidKey: 'BMbAhU-OqwfUPAH2vGuPPGzuBv2X2vVz4870DioHyESkYCsAynbd71Pf9V3AUp-SRFch1z9_ppMYM5i5s_0utgo' }).then((currentToken) => {
-                        if (currentToken) {
-                            saveTokenToDatabase(currentToken);
-                        }
-                    }).catch((err) => {
-                        console.log('An error occurred while retrieving token. ', err);
-                    });
-                }
+            // 2. Request Permission & Get Token
+            function requestPushPermission() {
+                Notification.requestPermission().then((permission) => {
+                    if (permission === 'granted') {
+                        getToken(messaging, { vapidKey: 'BMbAhU-OqwfUPAH2vGuPPGzuBv2X2vVz4870DioHyESkYCsAynbd71Pf9V3AUp-SRFch1z9_ppMYM5i5s_0utgo' }).then((currentToken) => {
+                            if (currentToken) {
+                                saveTokenToDatabase(currentToken);
+                            }
+                        }).catch((err) => {
+                            console.log('An error occurred while retrieving token. ', err);
+                        });
+                    }
+                });
+            }
+
+            // 3. Save Token to Laravel Backend
+            function saveTokenToDatabase(token) {
+                fetch('/save-fcm-token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({ token: token })
+                });
+            }
+
+            // 4. Handle Foreground Messages (When user is active on the site)
+            onMessage(messaging, (payload) => {
+                console.log('Message received in foreground ', payload);
+                // You can use a toast/alert library here to show the notification inside the app
+                alert(payload.notification.title + "\n" + payload.notification.body);
             });
-        }
 
-        // 3. Save Token to Laravel Backend
-        function saveTokenToDatabase(token) {
-            fetch('/save-fcm-token', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({ token: token })
+            // Ask for permission when page loads
+            document.addEventListener('DOMContentLoaded', () => {
+                requestPushPermission();
             });
-        }
-
-        // 4. Handle Foreground Messages (When user is active on the site)
-        onMessage(messaging, (payload) => {
-            console.log('Message received in foreground ', payload);
-            // You can use a toast/alert library here to show the notification inside the app
-            alert(payload.notification.title + "\n" + payload.notification.body);
-        });
-
-        // Ask for permission when page loads
-        document.addEventListener('DOMContentLoaded', () => {
-            requestPushPermission();
-        });
-    </script>
-
+        </script>
+    @endif
 </body>
 
 </html>
