@@ -310,10 +310,10 @@
     <!-- FIREBASE PUSH NOTIFICATION SCRIPT -->
     @if(Auth::check())
         <script type="module">
+            // MUST use the full HTTPS links here, not "firebase/app"
             import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
             import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
 
-            // 1. Your Firebase Config
             const firebaseConfig = {
                 apiKey: "AIzaSyB1EIwyQAuVb2D8m2zzQ6hTDZyp9_sJ5OI",
                 authDomain: "talmaza-dc8e8.firebaseapp.com",
@@ -327,7 +327,6 @@
             const app = initializeApp(firebaseConfig);
             const messaging = getMessaging(app);
 
-            // 2. Request Permission & Get Token
             function requestPushPermission() {
                 Notification.requestPermission().then((permission) => {
                     if (permission === 'granted') {
@@ -342,7 +341,6 @@
                 });
             }
 
-            // 3. Save Token to Laravel Backend
             function saveTokenToDatabase(token) {
                 fetch('/save-fcm-token', {
                     method: 'POST',
@@ -354,14 +352,11 @@
                 });
             }
 
-            // 4. Handle Foreground Messages (When user is active on the site)
             onMessage(messaging, (payload) => {
                 console.log('Message received in foreground ', payload);
-                // You can use a toast/alert library here to show the notification inside the app
                 alert(payload.notification.title + "\n" + payload.notification.body);
             });
 
-            // Ask for permission when page loads
             document.addEventListener('DOMContentLoaded', () => {
                 requestPushPermission();
             });

@@ -1,10 +1,10 @@
 // public/firebase-messaging-sw.js
 
-// Import Firebase scripts (Make sure to use the compat versions for the service worker)
-importScripts('[https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js](https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js)');
-importScripts('[https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js](https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js)');
+// 1. Corrected Import Scripts (No Markdown, No ES Imports)
+importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js');
 
-// Initialize Firebase (Replace with your actual config from Step 1)
+// 2. Initialize Firebase
 firebase.initializeApp({
     apiKey: "AIzaSyB1EIwyQAuVb2D8m2zzQ6hTDZyp9_sJ5OI",
     authDomain: "talmaza-dc8e8.firebaseapp.com",
@@ -17,13 +17,13 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// Handle background messages
+// 3. Handle background messages
 messaging.onBackgroundMessage(function(payload) {
     console.log('[firebase-messaging-sw.js] Received background message ', payload);
-    const notificationTitle = payload.notification.title;
+    const notificationTitle = payload.notification?.title || 'إشعار جديد';
     const notificationOptions = {
-        body: payload.notification.body,
-        icon: '/icons/icon.png' // Add your app icon path here
+        body: payload.notification?.body || '',
+        icon: '/icons/icon.png'
     };
 
     self.registration.showNotification(notificationTitle, notificationOptions);
