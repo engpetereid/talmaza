@@ -310,7 +310,6 @@
     <!-- FIREBASE PUSH NOTIFICATION SCRIPT -->
     @if(Auth::check())
         <script type="module">
-            // MUST use the full HTTPS links here, not "firebase/app"
             import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
             import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
 
@@ -328,15 +327,42 @@
             const messaging = getMessaging(app);
 
             function requestPushPermission() {
+                console.log('Requesting permission...');
                 Notification.requestPermission().then((permission) => {
                     if (permission === 'granted') {
-                        getToken(messaging, { vapidKey: 'BMbAhU-OqwfUPAH2vGuPPGzuBv2X2vVz4870DioHyESkYCsAynbd71Pf9V3AUp-SRFch1z9_ppMYM5i5s_0utgo' }).then((currentToken) => {
-                            if (currentToken) {
-                                saveTokenToDatabase(currentToken);
-                            }
-                        }).catch((err) => {
-                            console.log('An error occurred while retrieving token. ', err);
-                        });
+                        console.log('Permission granted. Registering Service Worker...');
+
+                        // --- NEW: Manually register the Service Worker ---
+                        if ('serviceWorker' in navigator) {
+                            navigator.serviceWorker.register('/firebase-messaging-sw.js')
+                                .then(function(registration) {
+                                    console.log('Service Worker Registration successful with scope: ', registration.scope);
+
+                                    // Now that it's registered, get the token and pass the registration
+                                    getToken(messaging, {
+                                        vapidKey: 'BMbAhU-OqwfUPAH2vGuPPGzuBv2X2vVz4870DioHyESkYCsAynbd71Pf9V3AUp-SRFch1z9_ppMYM5i5s_0utgo',
+                                        serviceWorkerRegistration: registration // Pass it here
+                                    }).then((currentToken) => {
+                                        if (currentToken) {
+                                            console.log('Token received: ', currentToken);
+                                            saveTokenToDatabase(currentToken);
+                                        } else {
+                                            console.log('No registration token available.');
+                                        }
+                                    }).catch((err) => {
+                                        console.error('An error occurred while retrieving token: ', err);
+                                    });
+
+                                }).catch(function(err) {
+                                console.error('Service Worker Registration failed: ', err);
+                            });
+                        } else {
+                            console.warn('Service Workers are not supported in this browser.');
+                        }
+                        // --------------------------------------------------
+
+                    } else {
+                        console.log('Permission denied.');
                     }
                 });
             }
@@ -349,6 +375,8 @@
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     },
                     body: JSON.stringify({ token: token })
+                }).then(response => {
+                    console.log('Token saved to DB response:', response.status);
                 });
             }
 
@@ -357,8 +385,9 @@
                 alert(payload.notification.title + "\n" + payload.notification.body);
             });
 
+            // Add small delay to ensure DOM is fully ready
             document.addEventListener('DOMContentLoaded', () => {
-                requestPushPermission();
+                setTimeout(requestPushPermission, 1000);
             });
         </script>
     @endif
