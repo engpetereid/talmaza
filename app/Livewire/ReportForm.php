@@ -7,7 +7,12 @@ use Livewire\Attributes\Layout;
 use App\Models\Report;
 use App\Models\Family;
 use App\Models\WeeklyMeeting;
+use App\Models\User; // تمت الإضافة
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log; // تمت الإضافة
+use Kreait\Firebase\Factory; // تمت الإضافة
+use Kreait\Firebase\Messaging\CloudMessage; // تمت الإضافة
+use Kreait\Firebase\Messaging\Notification; // تمت الإضافة
 use Carbon\Carbon;
 
 #[Layout('layouts.app')]
@@ -307,7 +312,7 @@ class ReportForm extends Component
         $report = Report::find($this->reportId);
 
         $report->update([
-            'timeline' => $this->type == 'weekly' ? $this->timeline : null, // Added timeline update
+            'timeline' => $this->type == 'weekly' ? $this->timeline : null,
             'weekly_achievements' => $this->type == 'weekly' ? $this->weekly_achievements : null,
             'monthly_summary' => $this->type == 'monthly' ? $this->monthly_summary : null,
             'priest_message' => $this->priest_message,
@@ -315,6 +320,37 @@ class ReportForm extends Component
             'admin_reply' => $this->admin_general_reply,
             'admin_reply_at' => now(),
         ]);
+
+        // إرسال إشعار Firebase للخادم (قائد العائلة)
+        try {
+            // جلب المستخدمين التابعين لهذه العائلة (الخدام) ولديهم توكن صالح
+            $tokens = User::where('family_id', $report->family_id)
+                ->whereNotNull('fcm_token')
+                ->where('fcm_token', '!=', '')
+                ->pluck('fcm_token')
+                ->toArray();
+
+            if (!empty($tokens)) {
+                $factory = (new Factory)->withServiceAccount(storage_path('app/firebase-auth.json'));
+                $messaging = $factory->createMessaging();
+
+                $adminName = Auth::user()->name;
+                $reportTypeAr = $this->type == 'weekly' ? 'الأسبوعي' : 'الشهري';
+
+                $message = CloudMessage::new()
+                    ->withNotification(Notification::create(
+                        'رد جديد على التقرير 📝',
+                        "تم الرد على تقريرك {$reportTypeAr} بواسطة {$adminName}."
+                    ))
+                    // توجيه الخادم لصفحة تفاصيل التقرير عند الضغط على الإشعار
+                    ->withData(['link' => route('report.view', $report->id, false)]);
+
+                $messaging->sendMulticast($message, $tokens);
+            }
+        } catch (\Throwable $e) {
+            // تجاهل الخطأ حتى لا يتم إيقاف عمل السيرفر إذا فشل الإرسال
+            Log::error('Firebase Notification Error (Admin Reply): ' . $e->getMessage());
+        }
 
         session()->flash('message', 'تم حفظ الردود بنجاح ✅');
     }
