@@ -42,4 +42,9 @@ class Report extends Model
     {
         return $this->belongsTo(Family::class);
     }
+
+    public function scopeUnrepliedReports($query)
+    {
+        return $query->whereNull('admin_reply_at');
+    }
 }

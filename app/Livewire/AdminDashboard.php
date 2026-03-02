@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\Report;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use App\Models\Family;
@@ -21,6 +22,7 @@ class AdminDashboard extends Component
         // الإحصائيات العامة
         $stats = [
             'families_count' => Family::count(),
+            'unreplied_reports' => Report::unrepliedReports()->count(),
             'members_count' => Member::where('is_active', true)->count(),
             'active_meetings_this_week' => WeeklyMeeting::where('status', 'completed')
                 ->whereBetween('week_date', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])

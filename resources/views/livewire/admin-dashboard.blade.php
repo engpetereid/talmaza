@@ -67,8 +67,11 @@
                     <div>
                         <h3 class="text-lg font-bold text-gray-900 transition-colors group-hover:text-indigo-700">متابعة
                             التقارير</h3>
-                        <p class="text-sm font-medium text-gray-500">الواردة من القادة</p>
+                        @if(isset($stats['unreplied_reports']) && $stats['unreplied_reports']!=0)
+                            <div class="text-xs font-bold text-red-500 transition-colors group-hover:text-red-700" > لم يتم الرد على {{$stats['unreplied_reports']}} تقارير </div>
+                        @endif
                     </div>
+
                 </a>
 
                 <!-- Announcements Tool -->
