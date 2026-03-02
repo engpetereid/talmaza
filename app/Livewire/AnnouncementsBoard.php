@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Log;
 use Kreait\Firebase\Factory;
 use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification;
+use Kreait\Firebase\Messaging\WebPushConfig; // 👈 السطر الجديد
 use Illuminate\Support\Str;
 
 #[Layout('layouts.app')]
@@ -64,31 +65,36 @@ class AnnouncementsBoard extends Component
 
         // 2. Send Firebase Push Notification to ALL users
         try {
-            // Get all valid tokens from the database (filtering out empty ones)
             $tokens = User::whereNotNull('fcm_token')->where('fcm_token', '!=', '')->pluck('fcm_token')->toArray();
 
             if (!empty($tokens)) {
                 $factory = (new Factory)->withServiceAccount(storage_path('app/firebase-auth.json'));
                 $messaging = $factory->createMessaging();
 
-                // Create the message with the announcement title and a short snippet of the content
+                // 👈 توليد رابط القرارات
+                $announcementsUrl = route('announcements', [], true);
+
                 $message = CloudMessage::new()
                     ->withNotification(Notification::create(
                         'قرار جديد 📢: ' . $this->title,
-                        Str::limit($this->content, 50) // Sends the first 50 characters of the content
+                        Str::limit($this->content, 50)
                     ))
-                    ->withData(['link' => '/announcements']);
+                    // 👈 إخبار المتصفح بالرابط عند الضغط
+                    ->withWebPushConfig(WebPushConfig::fromArray([
+                        'fcm_options' => [
+                            'link' => $announcementsUrl
+                        ]
+                    ]));
 
-                // Send to multiple devices at once
                 $messaging->sendMulticast($message, $tokens);
             }
-        } catch (\Exception $e) {
-            // Log the error so it doesn't crash the page if Firebase fails
+        } catch (\Throwable $e) { // <-- تم التغيير هنا من Exception إلى Throwable
+            // الآن حتى لو كان هناك خطأ قاتل في Firebase لن يظهر خطأ 500 للمستخدم
             Log::error('Firebase Notification Error: ' . $e->getMessage());
         }
 
         $this->reset(['title', 'content', 'attachment']);
-        session()->flash('message', 'تم نشر القرار وإرسال الإشعارات بنجاح 📢');
+        session()->flash('message', 'تم نشر القرار بنجاح 📢');
     }
 
     public function deletePost($id)
@@ -114,9 +120,8 @@ class AnnouncementsBoard extends Component
                     ->orWhere('content', 'like', '%' . $this->search . '%');
             });
         }
-
         return view('livewire.announcements-board', [
-            'posts' => $query->paginate(10)
-        ]);
+        'posts' => $query->paginate(10)
+    ]);
     }
 }
