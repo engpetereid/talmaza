@@ -1,4 +1,4 @@
-<div class="min-h-screen pb-20 bg-gray-50">
+<div class="min-h-screen pb-40 bg-gray-50">
 
     <!-- Header -->
     <div class="sticky top-0 z-20 bg-white border-b border-gray-200 shadow-sm">
@@ -140,7 +140,7 @@
                             </div>
 
                             <!-- Resources List -->
-                            <div class="pb-20 space-y-40">
+                            <div class="pb-32 space-y-6">
                                 <h3 class="flex items-center gap-3 text-xl font-bold text-gray-800">
                                     <span class="w-2 h-8 bg-indigo-600 rounded-full"></span>
                                     مشاركات القادة ({{ $activeLesson->resources->count() }})
