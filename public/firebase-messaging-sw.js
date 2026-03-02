@@ -20,11 +20,11 @@ const messaging = firebase.messaging();
 // 3. Handle background messages
 messaging.onBackgroundMessage(function(payload) {
     console.log('[firebase-messaging-sw.js] Received background message ', payload);
-    const notificationTitle = payload.notification?.title || 'إشعار جديد';
-    const notificationOptions = {
-        body: payload.notification?.body || '',
-        icon: '/icons/icon.png'
-    };
+    // const notificationTitle = payload.notification?.title || 'إشعار جديد';
+    // const notificationOptions = {
+    //     body: payload.notification?.body || '',
+    //     icon: '/icons/icon.png'
+    // };
 
-    self.registration.showNotification(notificationTitle, notificationOptions);
+    // self.registration.showNotification(notificationTitle, notificationOptions);
 });
