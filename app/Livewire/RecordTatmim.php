@@ -128,11 +128,6 @@ class RecordTatmim extends Component
                 // Convert to array for Livewire state
                 $data = $record->toArray();
 
-                // Mask 0 values as empty strings for the UI display
-                // This removes the default '0' from the input fields
-//                if ($data['note_score'] === 0) $data['note_score'] = '';
-//                if ($data['talmaza_training_count'] === 0) $data['talmaza_training_count'] = '';
-//                if ($data['kholwa_count'] === 0) $data['kholwa_count'] = '';
 
                 $this->records[$member->id] = $data;
             }

@@ -65,7 +65,7 @@ class AnnouncementsBoard extends Component
 
         // 2. Send Firebase Push Notification to ALL users
         try {
-            $tokens = User::whereNotNull('fcm_token')->where('fcm_token', '!=', '')->pluck('fcm_token')->toArray();
+            $tokens = User::whereNotNull('fcm_token')->where('fcm_token', '!=', '')->whereNot('id',Auth::id())->pluck('fcm_token')->toArray();
 
             if (!empty($tokens)) {
                 $factory = (new Factory)->withServiceAccount(storage_path('app/firebase-auth.json'));
