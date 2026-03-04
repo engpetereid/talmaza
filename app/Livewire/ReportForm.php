@@ -7,13 +7,13 @@ use Livewire\Attributes\Layout;
 use App\Models\Report;
 use App\Models\Family;
 use App\Models\WeeklyMeeting;
-use App\Models\User;
+use App\Models\User; // تمت الإضافة
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Log; // تمت الإضافة
 use Kreait\Firebase\Factory; // تمت الإضافة
 use Kreait\Firebase\Messaging\CloudMessage; // تمت الإضافة
 use Kreait\Firebase\Messaging\Notification; // تمت الإضافة
-use Kreait\Firebase\Messaging\WebPushConfig;
+use Kreait\Firebase\Messaging\WebPushConfig; // 👈 تمت إضافة هذا السطر الجديد
 use Carbon\Carbon;
 
 #[Layout('layouts.app')]
@@ -109,13 +109,14 @@ class ReportForm extends Component
             $this->$listName[] = ['text' => '', 'reply' => ''];
         }
     }
- public function removeItem($listName, $index)
-{
-    if (in_array($listName, ['weekly_achievements', 'monthly_summary', 'priest_message'])) {
-        unset($this->$listName[$index]);
-        $this->$listName = array_values($this->$listName);
+
+    public function removeItem($listName, $index)
+    {
+        if (in_array($listName, ['weekly_achievements', 'monthly_summary', 'priest_message'])) {
+            unset($this->$listName[$index]);
+            $this->$listName = array_values($this->$listName);
+        }
     }
-}
 
     public function initMembersNotes()
     {
@@ -222,7 +223,7 @@ class ReportForm extends Component
                     if ($record->has_servants_meeting) {
                         $memberStats['has_servants_meeting']++;
                         if ($record->is_present) $globalSums['servants']++;
-                   }
+                    }
                     if ($record->has_vespers || $record->has_tasbeha) {
                         $memberStats['has_tasbeha']++;
                         if ($record->is_present) $globalSums['vespers']++;
@@ -289,7 +290,8 @@ class ReportForm extends Component
             'visitation_hours' => $this->type == 'weekly' ? 'nullable|numeric|min:0' : 'nullable',
         ]);
 
-        Report::create([
+        // التعديل الأول: تخزين التقرير الجديد في متغير لكي نستطيع سحب الـ ID الخاص به
+        $newReport = Report::create([
             'family_id' => $this->family->id,
             'type' => $this->type,
             'report_date' => $this->type == 'monthly' ? Carbon::parse($this->report_date_input)->endOfMonth() : now(),
@@ -302,64 +304,102 @@ class ReportForm extends Component
             'priest_message' => $this->priest_message,
         ]);
 
+        try {
+            // جلب الادمن
+            $tokens = array_unique(User::where('role', 'admin')
+                ->whereNotNull('fcm_token')
+                ->where('fcm_token', '!=', '')
+                ->pluck('fcm_token')
+                ->toArray());
+
+            if (!empty($tokens)) {
+                $factory = (new Factory)->withServiceAccount(storage_path('app/firebase-auth.json'));
+                $messaging = $factory->createMessaging();
+
+                $userName = Auth::user()->name;
+                $reportTypeAr = $this->type == 'weekly' ? 'الأسبوعي' : 'الشهري';
+
+                // التعديل الثاني: استخدام $newReport->id بدلاً من $this->id
+                $reportUrl = route('report.view', $newReport->id, true);
+
+                $message = CloudMessage::new()
+                    ->withNotification(Notification::create(
+                        'تقرير جديد 📝',
+                        "تم ارسال تقرير {$reportTypeAr} بواسطة {$userName}."
+                    ))
+                    // 👈 إخبار المتصفح بالرابط عند الضغط
+                    ->withWebPushConfig(WebPushConfig::fromArray([
+                        'fcm_options' => [
+                            'link' => $reportUrl
+                        ]
+                    ]));
+
+                $messaging->sendMulticast($message, $tokens);
+            }
+        } catch (\Throwable $e) {
+            // تجاهل الخطأ حتى لا يتم إيقاف عمل السيرفر إذا فشل الإرسال
+            Log::error('Firebase Notification Error (New Report): ' . $e->getMessage());
+        }
+
         return redirect()->route('leader.reports')->with('message', 'تم إرسال التقرير بنجاح ✅');
     }
- public function saveAdminReply()
-{
-    if (Auth::user()->role !== 'admin') abort(403);
 
-    $report = Report::find($this->reportId);
+    public function saveAdminReply()
+    {
+        if (Auth::user()->role !== 'admin') abort(403);
 
-    $report->update([
-        'timeline' => $this->type == 'weekly' ? $this->timeline : null,
-        'weekly_achievements' => $this->type == 'weekly' ? $this->weekly_achievements : null,
-        'monthly_summary' => $this->type == 'monthly' ? $this->monthly_summary : null,
-        'priest_message' => $this->priest_message,
-        'members_notes' => $this->members_notes,
-        'admin_reply' => $this->admin_general_reply,
-        'admin_reply_at' => now(),
-    ]);
+        $report = Report::find($this->reportId);
 
-    // إرسال إشعار Firebase للخادم (قائد العائلة)
-    try {
-        // جلب المستخدمين التابعين لهذه العائلة (الخدام) ولديهم توكن صالح
-        $tokens = array_unique(User::where('family_id', $report->family_id)
-            ->whereNotNull('fcm_token')
-            ->where('fcm_token', '!=', '')
-            ->pluck('fcm_token')
-            ->toArray());
+        $report->update([
+            'timeline' => $this->type == 'weekly' ? $this->timeline : null,
+            'weekly_achievements' => $this->type == 'weekly' ? $this->weekly_achievements : null,
+            'monthly_summary' => $this->type == 'monthly' ? $this->monthly_summary : null,
+            'priest_message' => $this->priest_message,
+            'members_notes' => $this->members_notes,
+            'admin_reply' => $this->admin_general_reply,
+            'admin_reply_at' => now(),
+        ]);
 
-        if (!empty($tokens)) {
-            $factory = (new Factory)->withServiceAccount(storage_path('app/firebase-auth.json'));
-            $messaging = $factory->createMessaging();
+        // إرسال إشعار Firebase للخادم (قائد العائلة)
+        try {
+            // جلب المستخدمين التابعين لهذه العائلة (الخدام) ولديهم توكن صالح
+            $tokens = array_unique(User::where('family_id', $report->family_id)
+                ->whereNotNull('fcm_token')
+                ->where('fcm_token', '!=', '')
+                ->pluck('fcm_token')
+                ->toArray());
 
-            $adminName = Auth::user()->name;
-            $reportTypeAr = $this->type == 'weekly' ? 'الأسبوعي' : 'الشهري';
+            if (!empty($tokens)) {
+                $factory = (new Factory)->withServiceAccount(storage_path('app/firebase-auth.json'));
+                $messaging = $factory->createMessaging();
 
-            // 👈 توليد رابط كامل يبدأ بـ https
-            $reportUrl = route('report.view', $report->id, true);
+                $adminName = Auth::user()->name;
+                $reportTypeAr = $this->type == 'weekly' ? 'الأسبوعي' : 'الشهري';
 
-            $message = CloudMessage::new()
-                ->withNotification(Notification::create(
-                    'رد جديد على التقرير 📝',
-                    "تم الرد على تقريرك {$reportTypeAr} بواسطة {$adminName}."
-                ))
-                // 👈 إخبار المتصفح بالرابط عند الضغط
-                ->withWebPushConfig(WebPushConfig::fromArray([
-                    'fcm_options' => [
-                        'link' => $reportUrl
-                    ]
-                ]));
+                // 👈 توليد رابط كامل يبدأ بـ https
+                $reportUrl = route('report.view', $report->id, true);
 
-            $messaging->sendMulticast($message, $tokens);
+                $message = CloudMessage::new()
+                    ->withNotification(Notification::create(
+                        'رد جديد على التقرير 📝',
+                        "تم الرد على تقريرك {$reportTypeAr} بواسطة {$adminName}."
+                    ))
+                    // 👈 إخبار المتصفح بالرابط عند الضغط
+                    ->withWebPushConfig(WebPushConfig::fromArray([
+                        'fcm_options' => [
+                            'link' => $reportUrl
+                        ]
+                    ]));
+
+                $messaging->sendMulticast($message, $tokens);
+            }
+        } catch (\Throwable $e) {
+            // تجاهل الخطأ حتى لا يتم إيقاف عمل السيرفر إذا فشل الإرسال
+            Log::error('Firebase Notification Error (Admin Reply): ' . $e->getMessage());
         }
-    } catch (\Throwable $e) {
-        // تجاهل الخطأ حتى لا يتم إيقاف عمل السيرفر إذا فشل الإرسال
-        Log::error('Firebase Notification Error (Admin Reply): ' . $e->getMessage());
-    }
 
-    session()->flash('message', 'تم حفظ الردود بنجاح ✅');
-}
+        session()->flash('message', 'تم حفظ الردود بنجاح ✅');
+    }
 
     public function render()
     {

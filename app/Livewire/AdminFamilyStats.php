@@ -25,12 +25,12 @@ class AdminFamilyStats extends Component
         'mass' => ['label' => 'قداس', 'color' => '#ea580c'],
         'kholwa' => ['label' => 'مشاركة خلوة', 'color' => '#f97316'],
         'training' => ['label' => 'تلمذة', 'color' => '#ec4899'],
-        'vespers' => ['label' => 'عشية/تسبحة', 'color' => '#4f46e5'],
+        'tasbeha' => ['label' => 'عشية/تسبحة', 'color' => '#4f46e5'],
         'servants' => ['label' => 'اجتماع خدام', 'color' => '#16a34a'],
         'reading' => ['label' => 'قراءة', 'color' => '#0d9488'],
         'altar' => ['label' => 'مذبح', 'color' => '#dc2626'],
         'weekly_kholwa' => ['label' => 'خلوة أسبوعية', 'color' => '#be185d'],
-        'has_sermon' => ['label' => 'سماع العظة', 'color' => '#db2777'],
+        'sermon' => ['label' => 'سماع العظة', 'color' => '#db2777'],
     ];
 
     public function mount(Family $family)
@@ -91,11 +91,11 @@ class AdminFamilyStats extends Component
                     if ($record->is_present) $meetingSums['attendance'] += 100;
                     if ($record->has_mass) $meetingSums['mass'] += 100;
                     if ($record->has_weekly_kholwa) $meetingSums['weekly_kholwa'] += 100;
-                    if ($record->has_tasbeha || $record->has_vespers) $meetingSums['vespers'] += 100;
+                    if ($record->has_tasbeha)  $meetingSums['tasbeha'] += 100;
                     if ($record->has_servants_meeting) $meetingSums['servants'] += 100;
                     if ($record->has_reading) $meetingSums['reading'] += 100;
                     if ($record->has_family_altar) $meetingSums['altar'] += 100;
-                    if ($record->has_sermon) $meetingSums['has_sermon'] += 100;
+                    if ($record->has_sermon) $meetingSums['sermon'] += 100;
 
                     // Gradient/Calculated Metrics
                     $meetingSums['note'] += ($record->note_score / $maxNote) * 100;
@@ -124,11 +124,11 @@ class AdminFamilyStats extends Component
                     if ($record->is_present) $counters['attendance'] += 100;
                     if ($record->has_mass) $counters['mass'] += 100;
                     if ($record->has_weekly_kholwa) $counters['weekly_kholwa'] += 100;
-                    if ($record->has_tasbeha || $record->has_vespers) $counters['vespers'] += 100;
+                    if ($record->has_tasbeha) $counters['tasbeha'] += 100;
                     if ($record->has_servants_meeting) $counters['servants'] += 100;
                     if ($record->has_reading) $counters['reading'] += 100;
                     if ($record->has_family_altar) $counters['altar'] += 100;
-                    if ($record->has_sermon) $counters['has_sermon'] += 100;
+                    if ($record->has_sermon) $counters['sermon'] += 100;
 
                     $counters['note'] += ($record->note_score / $maxNote) * 100;
                     $counters['kholwa'] += min(($record->kholwa_count / 7) * 100, 100);
@@ -156,8 +156,23 @@ class AdminFamilyStats extends Component
         usort($membersStats, function ($a, $b) {
             return $b['total_average'] <=> $a['total_average'];
         });
+        // Calculate Family Averages
+        $familyAverages = [];
+        $activeMembersCount = count($membersStats);
+
+        if ($activeMembersCount > 0) {
+            // Get the keys to average from the service's empty counters plus the total average
+            $keys = array_keys($statsService->calculateRecordStats(null, $meetings->first()));
+            $keys[] = 'total_average';
+
+            foreach ($keys as $key) {
+                $sum = array_sum(array_column($membersStats, $key));
+                $familyAverages[$key] = round($sum / $activeMembersCount);
+            }
+        }
 
         return [
+            'family_averages' => $familyAverages,
             'meetings_count' => $meetingsCount,
             'members_stats' => $membersStats,
             'chart_data' => $chartData,

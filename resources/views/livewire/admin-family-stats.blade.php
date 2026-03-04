@@ -1,5 +1,5 @@
 <div class="min-h-screen pb-20 bg-gray-50">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ asset('build/assets/chart.js')}}"></script>
 
     <!-- Header -->
     <div class="sticky top-0 z-10 p-4 mx-auto bg-white border-b border-gray-100 shadow-sm rounded-2xl" style="max-width: 1000px">
@@ -46,17 +46,93 @@
                 <p class="mt-1 text-xs text-gray-400">حاول اختيار شهر أو سنة مختلفة</p>
             </div>
         @else
-            <!-- 1. Summary Cards -->
-            <div class="grid grid-cols-2 gap-4 mb-6">
-                <div class="p-4 text-center bg-white border border-gray-100 shadow-sm rounded-2xl">
-                    <span class="block mb-1 text-xs text-gray-400">اجتماعات الشهر</span>
-                    <span class="text-2xl font-bold text-indigo-600">{{ $data['meetings_count'] }}</span>
+            <!-- Summary Cards -->
+            <div class="grid grid-cols-2 gap-4 mb-6 md:grid-cols-4">
+                <div
+                    class="flex flex-col items-center justify-center p-6 text-center bg-white border border-gray-100 shadow-sm rounded-3xl">
+                    <span class="mb-2 text-xs font-bold tracking-wider text-gray-400 uppercase">اجتماعات الشهر</span>
+                    <span class="text-3xl font-black text-indigo-600">{{ $data['meetings_count'] }}</span>
                 </div>
-                <div class="p-4 text-center bg-white border border-gray-100 shadow-sm rounded-2xl">
-                    <span class="block mb-1 text-xs text-gray-400">المخدومين</span>
-                    <span class="text-2xl font-bold text-purple-600">{{ count($data['members_stats']) }}</span>
+                <div
+                    class="flex flex-col items-center justify-center p-6 text-center bg-white border border-gray-100 shadow-sm rounded-3xl">
+                    <span class="mb-2 text-xs font-bold tracking-wider text-gray-400 uppercase">عدد المخدومين</span>
+                    <span class="text-3xl font-black text-purple-600">{{ count($data['members_stats']) }}</span>
                 </div>
+                <!-- Top Performer (Optional Highlight) -->
+                @if(count($data['members_stats']) > 0)
+                    <div class="flex flex-col items-center justify-center col-span-2 p-6 text-center text-white shadow-lg bg-gradient-to-br from-green-500 to-emerald-600 rounded-3xl md:col-span-2">
+                        <span class="mb-1 text-xs font-bold tracking-wider uppercase text-green-100">الأعلى التزاماً</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-2xl font-black">{{ $data['members_stats'][0]['name'] }}</span>
+                            <span class="bg-white/20 px-2 py-1 rounded-lg text-sm font-bold">{{ $data['members_stats'][0]['total_average'] }}%</span>
+                        </div>
+                    </div>
+                @endif
             </div>
+
+            <!-- Family Average Stats -->
+            @if(isset($data['family_averages']))
+                <div class="mb-8 overflow-hidden transition-shadow bg-white border border-gray-200 shadow-sm rounded-3xl hover:shadow-md">
+                    <div class="flex items-center justify-between p-4 border-b border-indigo-100 bg-indigo-50/50">
+                        <div class="flex items-center gap-3">
+                            <div class="flex items-center justify-center w-10 h-10 text-xl font-black text-indigo-700 bg-white border border-indigo-100 rounded-full shadow-sm">
+                                📈
+                            </div>
+                            <h3 class="text-lg font-black text-gray-800">متوسط أداء العائلة</h3>
+                        </div>
+                        <span class="px-4 py-2 rounded-xl text-sm font-black {{ $data['family_averages']['total_average'] >= 50 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
+                        النسبة العامة: {{ $data['family_averages']['total_average'] }}%
+                    </span>
+                    </div>
+
+                    <div class="grid grid-cols-4 gap-3 p-4 text-center sm:grid-cols-6 lg:grid-cols-11">
+                        <div class="p-2 border border-blue-100 bg-blue-50 rounded-2xl">
+                            <div class="text-[11px] text-gray-500 font-bold mb-1">حضور</div>
+                            <div class="text-base font-black text-blue-700">{{ $data['family_averages']['attendance'] }}%</div>
+                        </div>
+                        <div class="p-2 border border-purple-100 bg-purple-50 rounded-2xl">
+                            <div class="text-[11px] text-gray-500 font-bold mb-1">نوتة</div>
+                            <div class="text-base font-black text-purple-700">{{ $data['family_averages']['note'] }}%</div>
+                        </div>
+                        <div class="p-2 border border-orange-100 bg-orange-50 rounded-2xl">
+                            <div class="text-[11px] text-gray-500 font-bold mb-1">قداس</div>
+                            <div class="text-base font-black text-orange-700">{{ $data['family_averages']['mass'] }}%</div>
+                        </div>
+                        <div class="p-2 border border-pink-100 bg-pink-50 rounded-2xl">
+                            <div class="text-[11px] text-gray-500 font-bold mb-1">تدريب التلمذة</div>
+                            <div class="text-base font-black text-pink-700">{{ $data['family_averages']['training'] }}%</div>
+                        </div>
+                        <div class="p-2 border border-orange-200 bg-orange-50/50 rounded-2xl">
+                            <div class="text-[11px] text-gray-500 font-bold mb-1">مشاركة الخلوة</div>
+                            <div class="text-base font-black text-orange-600">{{ $data['family_averages']['kholwa'] }}%</div>
+                        </div>
+                        <div class="p-2 border border-indigo-100 bg-indigo-50/50 rounded-2xl">
+                            <div class="text-[11px] text-gray-500 font-bold mb-1">تسبحة</div>
+                            <div class="text-base font-black text-indigo-700">{{ $data['family_averages']['tasbeha'] }}%</div>
+                        </div>
+                        <div class="p-2 border border-green-100 bg-green-50/50 rounded-2xl">
+                            <div class="text-[11px] text-gray-500 font-bold mb-1">اجتماع الخدام</div>
+                            <div class="text-base font-black text-green-700">{{ $data['family_averages']['servants'] }}%</div>
+                        </div>
+                        <div class="p-2 border border-red-100 bg-red-50/50 rounded-2xl">
+                            <div class="text-[11px] text-gray-500 font-bold mb-1">مذبح عائلى</div>
+                            <div class="text-base font-black text-red-700">{{ $data['family_averages']['altar'] }}%</div>
+                        </div>
+                        <div class="p-2 border border-teal-100 bg-teal-50/50 rounded-2xl">
+                            <div class="text-[11px] text-gray-500 font-bold mb-1">قراءة</div>
+                            <div class="text-base font-black text-teal-700">{{ $data['family_averages']['reading'] }}%</div>
+                        </div>
+                        <div class="p-2 border border-rose-100 bg-rose-50/50 rounded-2xl">
+                            <div class="text-[11px] text-gray-500 font-bold mb-1">خلوة أسبوعية</div>
+                            <div class="text-base font-black text-rose-700">{{ $data['family_averages']['weekly_kholwa'] }}%</div>
+                        </div>
+                        <div class="p-2 border border-yellow-100 bg-yellow-50/50 rounded-2xl">
+                            <div class="text-[11px] text-gray-500 font-bold mb-1">سماع العظة</div>
+                            <div class="text-base font-black text-yellow-700">{{ $data['family_averages']['sermon'] }}%</div>
+                        </div>
+                    </div>
+                </div>
+            @endif
 
             <!-- 2. Meetings List Toggle -->
             <div class="mb-6">
@@ -110,7 +186,7 @@
             </div>
 
             <!-- 3. Detailed Member Table -->
-            <div class="space-y-4">
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                 @foreach($data['members_stats'] as $stat)
                     <div
                         class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden {{ !$stat['is_active'] ? 'opacity-70 bg-gray-50' : '' }}">
@@ -165,7 +241,7 @@
                             </div>
                             <div class="col-span-1">
                                 <div class="text-[9px] text-gray-900 font-bold">تسبحة</div>
-                                <div class="text-xs font-bold">{{ $stat['vespers'] }}%</div>
+                                <div class="text-xs font-bold">{{ $stat['tasbeha'] }}%</div>
                             </div>
                             <div class="col-span-1">
                                 <div class="text-[9px] text-gray-900 font-bold">اجتماع الخدام</div>
@@ -185,7 +261,7 @@
                             </div>
                             <div class="col-span-1 ">
                                 <div class="text-[9px] text-gray-900 font-bold">سماع العظة</div>
-                                <div class="text-xs font-bold ">{{ $stat['has_sermon'] }}%</div>
+                                <div class="text-xs font-bold ">{{ $stat['sermon'] }}%</div>
                             </div>
                         </div>
                     </div>

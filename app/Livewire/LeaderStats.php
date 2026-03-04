@@ -5,7 +5,7 @@ namespace App\Livewire;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use App\Models\WeeklyMeeting;
-use App\Services\TatmimStatsService; 
+use App\Services\TatmimStatsService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
@@ -55,9 +55,25 @@ class LeaderStats extends Component
             return $b['total_average'] <=> $a['total_average'];
         });
 
+        // Calculate Family Averages
+        $familyAverages = [];
+        $activeMembersCount = count($membersStats);
+
+        if ($activeMembersCount > 0) {
+            // Get the keys to average from the service's empty counters plus the total average
+            $keys = array_keys($statsService->calculateRecordStats(null, $meetings->first()));
+            $keys[] = 'total_average';
+
+            foreach ($keys as $key) {
+                $sum = array_sum(array_column($membersStats, $key));
+                $familyAverages[$key] = round($sum / $activeMembersCount);
+            }
+        }
+
         return [
             'meetings_count' => $meetingsCount,
-            'members_stats' => $membersStats
+            'members_stats' => $membersStats,
+            'family_averages' => $familyAverages
         ];
     }
 

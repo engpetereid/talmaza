@@ -2,10 +2,17 @@
 
 namespace App\Livewire;
 
+use App\Models\User;
 use App\Models\WeeklyMeeting;
 use App\Models\Stage;
 use App\Models\Lesson;
 use App\Models\TatmimRecord;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Kreait\Firebase\Factory;
+use Kreait\Firebase\Messaging\CloudMessage;
+use Kreait\Firebase\Messaging\Notification;
+use Kreait\Firebase\Messaging\WebPushConfig;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url; // Enable URL Query Parameter
@@ -104,9 +111,9 @@ class RecordTatmim extends Component
                     ],
                     [
                         'is_present' => false,
-                        'note_score' => 0,
-                        'talmaza_training_count' => 0,
-                        'kholwa_count' => 0,
+                        'note_score' => null,
+                        'talmaza_training_count' => null,
+                        'kholwa_count' => null,
                         'has_weekly_kholwa' => false,
                         'has_mass' => false,
                         'has_tasbeha' => false,
@@ -123,9 +130,9 @@ class RecordTatmim extends Component
 
                 // Mask 0 values as empty strings for the UI display
                 // This removes the default '0' from the input fields
-                if ($data['note_score'] === 0) $data['note_score'] = '';
-                if ($data['talmaza_training_count'] === 0) $data['talmaza_training_count'] = '';
-                if ($data['kholwa_count'] === 0) $data['kholwa_count'] = '';
+//                if ($data['note_score'] === 0) $data['note_score'] = '';
+//                if ($data['talmaza_training_count'] === 0) $data['talmaza_training_count'] = '';
+//                if ($data['kholwa_count'] === 0) $data['kholwa_count'] = '';
 
                 $this->records[$member->id] = $data;
             }
@@ -190,6 +197,44 @@ class RecordTatmim extends Component
             // If readonly, just go back
             return redirect()->route('dashboard');
         }
+
+        try {
+            // جلب الادمن
+            $tokens = array_unique(User::where('role', 'admin')
+                ->whereNotNull('fcm_token')
+                ->where('fcm_token', '!=', '')
+                ->pluck('fcm_token')
+                ->toArray());
+
+            if (!empty($tokens)) {
+                $factory = (new Factory)->withServiceAccount(storage_path('app/firebase-auth.json'));
+                $messaging = $factory->createMessaging();
+
+                $userName = Auth::user()->name;
+
+                // تم التعديل هنا: استخدام $this->meeting->id بدلاً من $newMeeting->id
+                $reportUrl = route('meeting.record', $this->meeting->id, true);
+
+                $message = CloudMessage::new()
+                    ->withNotification(Notification::create(
+                        'تتميم جديد 📝',
+                        "تم ارسال تتميم بواسطة {$userName}."
+                    ))
+                    // 👈 إخبار المتصفح بالرابط عند الضغط
+                    ->withWebPushConfig(WebPushConfig::fromArray([
+                        'fcm_options' => [
+                            'link' => $reportUrl
+                        ]
+                    ]));
+
+                $messaging->sendMulticast($message, $tokens);
+            }
+        } catch (\Throwable $e) {
+            // تجاهل الخطأ حتى لا يتم إيقاف عمل السيرفر إذا فشل الإرسال
+            Log::error('Firebase Notification Error (New Record): ' . $e->getMessage());
+        }
+
+        // تم إضافة الفاصلة المنقوطة هنا
         return redirect()->route('dashboard')->with('status', 'تم تسجيل التتميم بنجاح!');
     }
 

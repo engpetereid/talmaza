@@ -72,7 +72,7 @@
                                 options: {
                                     responsive: true,
                                     maintainAspectRatio: false,
-                                    plugins: { legend: { position: "bottom", labels: { boxWidth: 10, font: { size: 10 } } } },
+                                    plugins: { legend: { position: "bottom", labels: { boxWidth: 10, font: { size: 15 } } } },
                                     scales: { y: { beginAtZero: true, max: 100, grid: { color: "#f3f4f6" } }, x: { grid: { display: false } } }
                                 }
                             });
@@ -133,7 +133,7 @@
             </div>
 
             <!-- 4. Detailed Member Table -->
-            <div class="space-y-4">
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                 @foreach($data['members_stats'] as $stat)
                     <div
                         class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden {{ !$stat['is_active'] ? 'opacity-70 bg-gray-50' : '' }}">
@@ -209,7 +209,7 @@
                             </div>
                             <div class="col-span-1 ">
                                 <div class="text-[9px] text-gray-400 font-bold">سماع العظة</div>
-                                <div class="text-xs font-bold ">{{ $stat['has_sermon'] }}%</div>
+                                <div class="text-xs font-bold ">{{ $stat['sermon'] }}%</div>
                             </div>
                         </div>
                     </div>

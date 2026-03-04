@@ -6,10 +6,10 @@
             <div class="flex flex-col justify-between gap-4 mb-4 md:flex-row md:items-center">
                 <div class="flex items-center gap-4">
                     <a href="{{ route('dashboard') }}" wire:navigate
-                        class="flex items-center justify-center w-12 h-12 text-gray-700 transition-colors bg-gray-100 rounded-2xl hover:bg-gray-200"
-                        aria-label="عودة للرئيسية">
+                       class="flex items-center justify-center w-12 h-12 text-gray-700 transition-colors bg-gray-100 rounded-2xl hover:bg-gray-200"
+                       aria-label="عودة للرئيسية">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                             stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <path d="m15 18-6-6 6-6" />
                         </svg>
                     </a>
@@ -23,7 +23,7 @@
                 <div class="flex flex-col w-full gap-3 sm:flex-row md:w-auto">
                     <!-- Year Selector -->
                     <select wire:model.live="year"
-                        class="bg-gray-50 border-2 border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 font-bold w-full sm:w-auto transition-colors">
+                            class="bg-gray-50 border-2 border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 font-bold w-full sm:w-auto transition-colors">
                         @foreach($availableYears as $y)
                             <option value="{{ $y }}">{{ $y }}</option>
                         @endforeach
@@ -33,7 +33,7 @@
                     <div class="flex flex-grow gap-2 pb-2 overflow-x-auto sm:pb-0 no-scrollbar">
                         @for ($i = 1; $i <= 12; $i++)
                             <button wire:click="$set('month', {{ $i }})"
-                                class="px-5 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all border-2
+                                    class="px-5 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all border-2
                                             {{ $month == $i ? 'bg-indigo-600 text-white border-indigo-600 shadow-lg shadow-indigo-200' : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300' }}">
                                 {{ Carbon\Carbon::create()->month($i)->locale('ar')->monthName }}
                             </button>
@@ -57,7 +57,7 @@
             </div>
         @else
             <!-- Summary Cards -->
-            <div class="grid grid-cols-2 gap-4 mb-8 md:grid-cols-4">
+            <div class="grid grid-cols-2 gap-4 mb-6 md:grid-cols-4">
                 <div
                     class="flex flex-col items-center justify-center p-6 text-center bg-white border border-gray-100 shadow-sm rounded-3xl">
                     <span class="mb-2 text-xs font-bold tracking-wider text-gray-400 uppercase">اجتماعات الشهر</span>
@@ -68,8 +68,81 @@
                     <span class="mb-2 text-xs font-bold tracking-wider text-gray-400 uppercase">عدد المخدومين</span>
                     <span class="text-3xl font-black text-purple-600">{{ count($data['members_stats']) }}</span>
                 </div>
-
+                <!-- Top Performer (Optional Highlight) -->
+                @if(count($data['members_stats']) > 0)
+                    <div class="flex flex-col items-center justify-center col-span-2 p-6 text-center text-white shadow-lg bg-gradient-to-br from-green-500 to-emerald-600 rounded-3xl md:col-span-2">
+                        <span class="mb-1 text-xs font-bold tracking-wider uppercase text-green-100">الأعلى التزاماً</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-2xl font-black">{{ $data['members_stats'][0]['name'] }}</span>
+                            <span class="bg-white/20 px-2 py-1 rounded-lg text-sm font-bold">{{ $data['members_stats'][0]['total_average'] }}%</span>
+                        </div>
+                    </div>
+                @endif
             </div>
+
+            <!-- Family Average Stats -->
+            @if(isset($data['family_averages']))
+                <div class="mb-8 overflow-hidden transition-shadow bg-white border border-gray-200 shadow-sm rounded-3xl hover:shadow-md">
+                    <div class="flex items-center justify-between p-4 border-b border-indigo-100 bg-indigo-50/50">
+                        <div class="flex items-center gap-3">
+                            <div class="flex items-center justify-center w-10 h-10 text-xl font-black text-indigo-700 bg-white border border-indigo-100 rounded-full shadow-sm">
+                                📈
+                            </div>
+                            <h3 class="text-lg font-black text-gray-800">متوسط أداء العائلة</h3>
+                        </div>
+                        <span class="px-4 py-2 rounded-xl text-sm font-black {{ $data['family_averages']['total_average'] >= 50 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
+                        النسبة العامة: {{ $data['family_averages']['total_average'] }}%
+                    </span>
+                    </div>
+
+                    <div class="grid grid-cols-4 gap-3 p-4 text-center sm:grid-cols-6 lg:grid-cols-11">
+                        <div class="p-2 border border-blue-100 bg-blue-50 rounded-2xl">
+                            <div class="text-[11px] text-gray-500 font-bold mb-1">حضور</div>
+                            <div class="text-base font-black text-blue-700">{{ $data['family_averages']['attendance'] }}%</div>
+                        </div>
+                        <div class="p-2 border border-purple-100 bg-purple-50 rounded-2xl">
+                            <div class="text-[11px] text-gray-500 font-bold mb-1">نوتة</div>
+                            <div class="text-base font-black text-purple-700">{{ $data['family_averages']['note'] }}%</div>
+                        </div>
+                        <div class="p-2 border border-orange-100 bg-orange-50 rounded-2xl">
+                            <div class="text-[11px] text-gray-500 font-bold mb-1">قداس</div>
+                            <div class="text-base font-black text-orange-700">{{ $data['family_averages']['mass'] }}%</div>
+                        </div>
+                        <div class="p-2 border border-pink-100 bg-pink-50 rounded-2xl">
+                            <div class="text-[11px] text-gray-500 font-bold mb-1">تدريب التلمذة</div>
+                            <div class="text-base font-black text-pink-700">{{ $data['family_averages']['training'] }}%</div>
+                        </div>
+                        <div class="p-2 border border-orange-200 bg-orange-50/50 rounded-2xl">
+                            <div class="text-[11px] text-gray-500 font-bold mb-1">مشاركة الخلوة</div>
+                            <div class="text-base font-black text-orange-600">{{ $data['family_averages']['kholwa'] }}%</div>
+                        </div>
+                        <div class="p-2 border border-indigo-100 bg-indigo-50/50 rounded-2xl">
+                            <div class="text-[11px] text-gray-500 font-bold mb-1">تسبحة</div>
+                            <div class="text-base font-black text-indigo-700">{{ $data['family_averages']['tasbeha'] }}%</div>
+                        </div>
+                        <div class="p-2 border border-green-100 bg-green-50/50 rounded-2xl">
+                            <div class="text-[11px] text-gray-500 font-bold mb-1">اجتماع الخدام</div>
+                            <div class="text-base font-black text-green-700">{{ $data['family_averages']['servants'] }}%</div>
+                        </div>
+                        <div class="p-2 border border-red-100 bg-red-50/50 rounded-2xl">
+                            <div class="text-[11px] text-gray-500 font-bold mb-1">مذبح عائلى</div>
+                            <div class="text-base font-black text-red-700">{{ $data['family_averages']['altar'] }}%</div>
+                        </div>
+                        <div class="p-2 border border-teal-100 bg-teal-50/50 rounded-2xl">
+                            <div class="text-[11px] text-gray-500 font-bold mb-1">قراءة</div>
+                            <div class="text-base font-black text-teal-700">{{ $data['family_averages']['reading'] }}%</div>
+                        </div>
+                        <div class="p-2 border border-rose-100 bg-rose-50/50 rounded-2xl">
+                            <div class="text-[11px] text-gray-500 font-bold mb-1">خلوة أسبوعية</div>
+                            <div class="text-base font-black text-rose-700">{{ $data['family_averages']['weekly_kholwa'] }}%</div>
+                        </div>
+                        <div class="p-2 border border-yellow-100 bg-yellow-50/50 rounded-2xl">
+                            <div class="text-[11px] text-gray-500 font-bold mb-1">سماع العظة</div>
+                            <div class="text-base font-black text-yellow-700">{{ $data['family_averages']['sermon'] }}%</div>
+                        </div>
+                    </div>
+                </div>
+            @endif
 
             <!-- Members List Grid -->
             <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -79,7 +152,7 @@
 
                         <!-- Header -->
                         <a href="{{ route('member.stats', $stat['id']) }}"
-                            class="flex items-center justify-between p-4 border-b border-gray-50 bg-gray-50/50">
+                           class="flex items-center justify-between p-4 border-b border-gray-50 bg-gray-50/50">
                             <!-- Link to Member Page -->
                             <div class="flex items-center gap-2 group">
                                 <div
@@ -148,7 +221,7 @@
                             </div>
                             <div class="col-span-1 pt-2 mt-2 border-t border-gray-50">
                                 <div class="text-[10px] text-gray-400 font-bold">سماع العظة</div>
-                                <div class="text-sm font-bold text-gray-700">{{ $stat['has_sermon'] }}%</div>
+                                <div class="text-sm font-bold text-gray-700">{{ $stat['sermon'] ?? 0 }}%</div>
                             </div>
                         </div>
                     </div>

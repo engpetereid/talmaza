@@ -54,12 +54,12 @@ class TatmimStatsService
             'attendance' => $record->is_present ? 100 : 0,
             'mass' => $record->has_mass ? 100 : 0,
             // Check both columns if vespers was renamed or keep single if cleaned up
-            'tasbeha' =>  $record->has_tasbeha ? 100 : 0,
+            'tasbeha' => $record->has_tasbeha ? 100 : 0,
             'servants' => $record->has_servants_meeting ? 100 : 0,
             'reading' => $record->has_reading ? 100 : 0,
             'altar' => $record->has_family_altar ? 100 : 0,
             'weekly_kholwa' => $record->has_weekly_kholwa ? 100 : 0,
-            'has_sermon' => $record->has_sermon ? 100 : 0,
+            'sermon' => $record->has_sermon ? 100 : 0,
 
             // Gradient Fields (Calculated Percentage 0-100)
             'note' => ($record->note_score / $maxNote) * 100,
@@ -76,12 +76,12 @@ class TatmimStatsService
             'kholwa' => 0,
             'training' => 0,
             'weekly_kholwa' => 0,
-            'has_sermon' => 0,
             'mass' => 0,
             'tasbeha' => 0,
             'servants' => 0,
             'reading' => 0,
             'altar' => 0,
+            'sermon' => 0,
         ];
     }
 
