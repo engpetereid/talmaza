@@ -42,6 +42,11 @@ class RecordTatmim extends Component
 
     public function mount(WeeklyMeeting $meeting)
     {
+        $user = Auth::user();
+        if ($user->role !== 'admin' && $user->family_id !== $meeting->family_id) {
+            abort(403, 'غير مصرح لك بالدخول لاجتماعات عائلة أخرى.');
+        }
+        // ----------------------------------
         $this->meeting = $meeting;
 
         if ($meeting->status !== 'pending' && $meeting->created_at < Carbon::now()->subWeeks(2)) {
