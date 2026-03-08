@@ -126,7 +126,6 @@ class RecordTatmim extends Component
                         'has_reading' => false,
                         'has_family_altar' => false,
                         'has_sermon' => false,
-                        'comments' => null,
                     ]
                 );
 
