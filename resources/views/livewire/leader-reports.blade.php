@@ -59,7 +59,7 @@
                 </div>
             </div>
 
-        <!-- STATE 2: REPORTS DASHBOARD (UNLOCKED) -->
+            <!-- STATE 2: REPORTS DASHBOARD (UNLOCKED) -->
         @else
             @if (session()->has('message'))
                 <div class="flex items-center gap-3 p-4 mb-6 font-bold text-green-800 bg-green-100 border-r-4 border-green-500 shadow-sm rounded-xl animate-fade-in-down">
@@ -97,7 +97,7 @@
             <div class="overflow-hidden bg-white border border-gray-200 shadow-sm rounded-3xl">
                 <div class="flex items-center justify-between p-6 border-b border-gray-100 bg-gray-50/50">
                     <h3 class="flex items-center gap-2 text-xl font-black text-gray-800">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-gray-400"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>
+                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-gray-400"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>
                         الأرشيف السابق
                     </h3>
                     <span class="px-3 py-1 text-sm font-bold text-gray-700 bg-gray-200 rounded-full">{{ count($reports) }}</span>
@@ -105,10 +105,19 @@
 
                 <div class="divide-y divide-gray-100">
                     @forelse($reports as $report)
-                        <div class="flex items-center justify-between p-5 transition-colors hover:bg-indigo-50/50 group">
+                        @php
+                            $isPending = is_null($report->admin_reply_at);
+                            $waitingForAdmin = !$isPending && $report->updated_at->gt($report->admin_reply_at);
+                        @endphp
+
+                        <div class="flex items-center justify-between p-5 transition-colors hover:bg-indigo-50/50 group relative">
+                            <!-- مؤشر الرد الجديد -->
+                            @if(!$isPending && !$waitingForAdmin)
+                                <div class="absolute right-0 top-0 bottom-0 w-1 bg-green-500"></div>
+                            @endif
 
                             <!-- Left Area (Clickable Link) -->
-                            <a href="{{ route('report.view', $report->id) }}" wire:navigate class="flex items-center flex-grow gap-4">
+                            <a href="{{ route('report.view', $report->id) }}" wire:navigate class="flex items-center flex-grow gap-4 pl-4">
                                 <div class="w-12 h-12 rounded-xl flex items-center justify-center text-xl shadow-sm border border-gray-100 {{ $report->type == 'weekly' ? 'bg-indigo-100 text-indigo-600' : 'bg-orange-100 text-orange-600' }}">
                                     {{ $report->type == 'weekly' ? '📅' : '📊' }}
                                 </div>
@@ -119,6 +128,8 @@
                                     <div class="flex items-center gap-2 text-xs font-bold text-gray-400">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                                         {{ \Carbon\Carbon::parse($report->report_date)->locale('ar')->isoFormat('D MMMM YYYY') }}
+                                        <span class="mx-1">•</span>
+                                        آخر نشاط: {{ $report->updated_at->diffForHumans() }}
                                     </div>
                                 </div>
                             </a>
@@ -126,15 +137,23 @@
                             <!-- Right Area (Status & Delete) -->
                             <div class="flex items-center gap-3">
                                 <!-- Status Badge -->
-                                @if($report->admin_reply_at)
-                                    <span class="inline-flex items-center gap-1 bg-green-100 text-green-700 text-xs font-bold px-3 py-1.5 rounded-full border border-green-200">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-                                        <span class="hidden sm:inline">تم الرد</span>
-                                    </span>
-                                @else
+                                @if($isPending)
                                     <span class="inline-flex items-center gap-1 bg-gray-100 text-gray-500 text-xs font-bold px-3 py-1.5 rounded-full border border-gray-200">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                                         <span class="hidden sm:inline">قيد المراجعة</span>
+                                    </span>
+                                @elseif($waitingForAdmin)
+                                    <span class="inline-flex items-center gap-1 bg-orange-100 text-orange-700 text-xs font-bold px-3 py-1.5 rounded-full border border-orange-200">
+                                        <span class="relative flex w-2 h-2">
+                                            <span class="absolute inline-flex w-full h-full bg-orange-400 rounded-full opacity-75 animate-ping"></span>
+                                            <span class="relative inline-flex w-2 h-2 bg-orange-500 rounded-full"></span>
+                                        </span>
+                                        <span class="hidden sm:inline">بانتظار الرد الجديد</span>
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1 bg-green-100 text-green-700 text-xs font-bold px-3 py-1.5 rounded-full border border-green-200">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                                        <span class="hidden sm:inline">تم الرد</span>
                                     </span>
                                 @endif
 

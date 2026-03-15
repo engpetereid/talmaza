@@ -35,11 +35,16 @@ class AdminReportsReview extends Component
 
     public function render()
     {
-        $query = Report::with('family')->latest('report_date');
+        // ترتيب التقارير حسب آخر نشاط (رد) لكي تصعد المحادثات النشطة للأعلى
+        $query = Report::with('family')->latest('updated_at');
 
         // تطبيق الفلاتر
         if ($this->filter == 'pending') {
-            $query->whereNull('admin_reply_at');
+            $query->where(function ($q) {
+                // يحتاج لرد إذا لم يتم الرد عليه أبداً، أو إذا قام القائد بالرد بعد آخر رد للإدارة
+                $q->whereNull('admin_reply_at')
+                    ->orWhereColumn('updated_at', '>', 'admin_reply_at');
+            });
         } elseif ($this->filter == 'weekly') {
             $query->where('type', 'weekly');
         } elseif ($this->filter == 'monthly') {

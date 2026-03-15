@@ -24,7 +24,7 @@ class LeaderReports extends Component
 
         // 2. Check Requirement: Does user have a PIN?
         if (!Auth::user()->report_pin) {
-            return redirect()->route('profile')->with('pin-status', 'يرجى تعيين كود حماية للتقارير أولاً 🔒');
+            return $this->redirectRoute('profile')->with('pin-status', 'يرجى تعيين كود حماية للتقارير أولاً 🔒');
         }
     }
 
@@ -67,8 +67,9 @@ class LeaderReports extends Component
 
         // Fetch data only if unlocked
         if (!$this->isLocked) {
+            // التعديل: الترتيب حسب آخر نشاط لكي تظهر المحادثات المتجددة في الأعلى
             $reports = Report::where('family_id', Auth::user()->family_id)
-                ->latest('report_date')
+                ->latest('updated_at')
                 ->get();
         }
 

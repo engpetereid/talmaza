@@ -7,13 +7,13 @@ use Livewire\Attributes\Layout;
 use App\Models\Report;
 use App\Models\Family;
 use App\Models\WeeklyMeeting;
-use App\Models\User; // تمت الإضافة
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log; // تمت الإضافة
-use Kreait\Firebase\Factory; // تمت الإضافة
-use Kreait\Firebase\Messaging\CloudMessage; // تمت الإضافة
-use Kreait\Firebase\Messaging\Notification; // تمت الإضافة
-use Kreait\Firebase\Messaging\WebPushConfig; // 👈 تمت إضافة هذا السطر الجديد
+use Illuminate\Support\Facades\Log;
+use Kreait\Firebase\Factory;
+use Kreait\Firebase\Messaging\CloudMessage;
+use Kreait\Firebase\Messaging\Notification;
+use Kreait\Firebase\Messaging\WebPushConfig;
 use Carbon\Carbon;
 
 #[Layout('layouts.app')]
@@ -25,19 +25,19 @@ class ReportForm extends Component
     public $isReadOnly = false;
 
     // --- Weekly Report Data ---
-    public $timeline = [['time' => '', 'activity' => '', 'reply' => '']];
-    public $weekly_achievements = [['text' => '', 'reply' => '']];
+    public $timeline = [];
+    public $weekly_achievements = [];
     public $visitation_hours;
 
     // --- Monthly Report Data ---
     public $report_date_input;
-    public $monthly_summary = [['text' => '', 'reply' => '']];
+    public $monthly_summary = [];
     public $members_notes = [];
     public $stats_snapshot = [];
     public $members_monthly_stats = [];
 
     // --- Common ---
-    public $priest_message = [['text' => '', 'reply' => '']];
+    public $priest_message = [];
     public $admin_general_reply;
     public $admin_reply_at;
 
@@ -58,20 +58,27 @@ class ReportForm extends Component
             $this->family = $report->family;
             $this->isReadOnly = true;
 
-            // Load Data
-            $this->timeline = $report->timeline ?? [['time' => '', 'activity' => '', 'reply' => '']];
-            $this->weekly_achievements = $report->weekly_achievements ?? [['text' => '', 'reply' => '']];
+            // Load & Normalize Data (Convert old single reply to replies array)
+            $this->timeline = $this->normalizeSection($report->timeline ?? [['time' => '', 'activity' => '']]);
+            $this->weekly_achievements = $this->normalizeSection($report->weekly_achievements ?? [['text' => '']]);
             $this->visitation_hours = $report->visitation_hours;
-            $this->monthly_summary = $report->monthly_summary ?? [['text' => '', 'reply' => '']];
+            $this->monthly_summary = $this->normalizeSection($report->monthly_summary ?? [['text' => '']]);
             $this->stats_snapshot = $report->stats_snapshot ?? [];
             $this->report_date_input = Carbon::parse($report->report_date)->format('Y-m');
-            $this->priest_message = $report->priest_message ?? [['text' => '', 'reply' => '']];
-            $this->members_notes = $report->members_notes ?? [];
+            $this->priest_message = $this->normalizeSection($report->priest_message ?? [['text' => '']]);
+            $this->members_notes = $this->normalizeMembersNotes($report->members_notes ?? []);
+
             $this->admin_general_reply = $report->admin_reply;
             $this->admin_reply_at = $report->admin_reply_at;
         } else {
             $this->type = $type;
             $this->family = Auth::user()->family;
+
+            // Initialize empty structures for new report
+            $this->timeline = $this->normalizeSection([['time' => '', 'activity' => '']]);
+            $this->weekly_achievements = $this->normalizeSection([['text' => '']]);
+            $this->monthly_summary = $this->normalizeSection([['text' => '']]);
+            $this->priest_message = $this->normalizeSection([['text' => '']]);
         }
 
         if ($this->family) {
@@ -80,9 +87,7 @@ class ReportForm extends Component
             if ($this->isReadOnly) {
                 foreach ($this->familyMembers as $member) {
                     if (!isset($this->members_notes[$member->id])) {
-                        $this->members_notes[$member->id] = ['text' => '', 'reply' => ''];
-                    } elseif (is_string($this->members_notes[$member->id])) {
-                        $this->members_notes[$member->id] = ['text' => $this->members_notes[$member->id], 'reply' => ''];
+                        $this->members_notes[$member->id] = ['text' => '', 'replies' => [], 'new_reply' => ''];
                     }
                 }
             }
@@ -96,6 +101,56 @@ class ReportForm extends Component
         }
     }
 
+    /**
+     * Helper to upgrade old DB structure to new threaded replies structure
+     */
+    private function normalizeSection($section)
+    {
+        if (!is_array($section)) return [];
+        foreach ($section as &$item) {
+            if (!isset($item['replies'])) {
+                $item['replies'] = [];
+                // Migrate old single reply if exists
+                if (isset($item['reply']) && $item['reply'] !== '') {
+                    $item['replies'][] = [
+                        'role' => 'admin',
+                        'name' => 'الإدارة',
+                        'text' => $item['reply'],
+                        'date' => now()->toDateTimeString()
+                    ];
+                }
+            }
+            unset($item['reply']);
+            $item['new_reply'] = ''; // Input field for new reply
+        }
+        return $section;
+    }
+
+    private function normalizeMembersNotes($notes)
+    {
+        if (!is_array($notes)) return [];
+        foreach ($notes as $id => &$note) {
+            if (is_string($note)) {
+                $note = ['text' => $note, 'replies' => [], 'new_reply' => ''];
+            } else {
+                if (!isset($note['replies'])) {
+                    $note['replies'] = [];
+                    if (isset($note['reply']) && $note['reply'] !== '') {
+                        $note['replies'][] = [
+                            'role' => 'admin',
+                            'name' => 'الإدارة',
+                            'text' => $note['reply'],
+                            'date' => now()->toDateTimeString()
+                        ];
+                    }
+                }
+                unset($note['reply']);
+                $note['new_reply'] = '';
+            }
+        }
+        return $notes;
+    }
+
     public function updatedReportDateInput()
     {
         if ($this->type == 'monthly') {
@@ -106,7 +161,7 @@ class ReportForm extends Component
     public function addItem($listName)
     {
         if (in_array($listName, ['weekly_achievements', 'monthly_summary', 'priest_message'])) {
-            $this->$listName[] = ['text' => '', 'reply' => ''];
+            $this->$listName[] = ['text' => '', 'replies' => [], 'new_reply' => ''];
         }
     }
 
@@ -124,7 +179,7 @@ class ReportForm extends Component
             $members = $this->family->members()->where('is_active', true)->get();
             foreach ($members as $member) {
                 if (!isset($this->members_notes[$member->id])) {
-                    $this->members_notes[$member->id] = ['text' => '', 'reply' => ''];
+                    $this->members_notes[$member->id] = ['text' => '', 'replies' => [], 'new_reply' => ''];
                 }
             }
         }
@@ -132,7 +187,7 @@ class ReportForm extends Component
 
     public function addTimelineRow()
     {
-        $this->timeline[] = ['time' => '', 'activity' => '', 'reply' => ''];
+        $this->timeline[] = ['time' => '', 'activity' => '', 'replies' => [], 'new_reply' => ''];
     }
 
     public function removeTimelineRow($index)
@@ -167,36 +222,19 @@ class ReportForm extends Component
         }
 
         $globalSums = [
-            'attendance' => 0,
-            'note' => 0,
-            'kholwa' => 0,
-            'training' => 0,
-            'weekly_kholwa' => 0,
-            'mass' => 0,
-            'vespers' => 0,
-            'tasbeha' => 0,
-            'sermon' => 0,
-            'servants' => 0,
-            'reading' => 0,
-            'altar' => 0,
+            'attendance' => 0, 'note' => 0, 'kholwa' => 0, 'training' => 0,
+            'weekly_kholwa' => 0, 'mass' => 0, 'vespers' => 0, 'tasbeha' => 0,
+            'sermon' => 0, 'servants' => 0, 'reading' => 0, 'altar' => 0,
         ];
 
         $totalPresentCount = 0;
 
         foreach ($this->familyMembers as $member) {
             $memberStats = [
-                'name' => $member->name,
-                'is_active' => $member->is_active,
-                'attendance' => 0,
-                'note_score' => 0,
-                'has_mass' => 0,
-                'has_servants_meeting' => 0,
-                'has_tasbeha' => 0,
-                'has_reading' => 0,
-                'has_sermon' => 0,
-                'has_family_altar' => 0,
-                'kholwa_count' => 0,
-                'talmaza_training_count' => 0,
+                'name' => $member->name, 'is_active' => $member->is_active, 'attendance' => 0,
+                'note_score' => 0, 'has_mass' => 0, 'has_servants_meeting' => 0,
+                'has_tasbeha' => 0, 'has_reading' => 0, 'has_sermon' => 0,
+                'has_family_altar' => 0, 'kholwa_count' => 0, 'talmaza_training_count' => 0,
                 'has_weekly_kholwa' => 0,
             ];
 
@@ -212,38 +250,15 @@ class ReportForm extends Component
 
                     $maxNote = max($meeting->max_note_score, 1);
                     $memberStats['note_score'] += ($record->note_score / $maxNote);
-                    if ($record->is_present) {
-                        $globalSums['note'] += ($record->note_score / $maxNote);
-                    }
+                    if ($record->is_present) $globalSums['note'] += ($record->note_score / $maxNote);
 
-                    if ($record->has_mass) {
-                        $memberStats['has_mass']++;
-                        if ($record->is_present) $globalSums['mass']++;
-                    }
-                    if ($record->has_servants_meeting) {
-                        $memberStats['has_servants_meeting']++;
-                        if ($record->is_present) $globalSums['servants']++;
-                    }
-                    if ($record->has_vespers || $record->has_tasbeha) {
-                        $memberStats['has_tasbeha']++;
-                        if ($record->is_present) $globalSums['vespers']++;
-                    }
-                    if ($record->has_reading) {
-                        $memberStats['has_reading']++;
-                        if ($record->is_present) $globalSums['reading']++;
-                    }
-                    if ($record->has_family_altar) {
-                        $memberStats['has_family_altar']++;
-                        if ($record->is_present) $globalSums['altar']++;
-                    }
-                    if ($record->has_weekly_kholwa) {
-                        $memberStats['has_weekly_kholwa']++;
-                        if ($record->is_present) $globalSums['weekly_kholwa']++;
-                    }
-                    if ($record->has_sermon) {
-                        $memberStats['has_sermon']++;
-                        if ($record->is_present) $globalSums['sermon']++;
-                    }
+                    if ($record->has_mass) { $memberStats['has_mass']++; if ($record->is_present) $globalSums['mass']++; }
+                    if ($record->has_servants_meeting) { $memberStats['has_servants_meeting']++; if ($record->is_present) $globalSums['servants']++; }
+                    if ($record->has_vespers || $record->has_tasbeha) { $memberStats['has_tasbeha']++; if ($record->is_present) $globalSums['vespers']++; }
+                    if ($record->has_reading) { $memberStats['has_reading']++; if ($record->is_present) $globalSums['reading']++; }
+                    if ($record->has_family_altar) { $memberStats['has_family_altar']++; if ($record->is_present) $globalSums['altar']++; }
+                    if ($record->has_weekly_kholwa) { $memberStats['has_weekly_kholwa']++; if ($record->is_present) $globalSums['weekly_kholwa']++; }
+                    if ($record->has_sermon) { $memberStats['has_sermon']++; if ($record->is_present) $globalSums['sermon']++; }
 
                     $memberStats['kholwa_count'] += min($record->kholwa_count / 7, 1);
                     if ($record->kholwa_count > 3 && $record->is_present) $globalSums['kholwa']++;
@@ -257,7 +272,6 @@ class ReportForm extends Component
                 if (in_array($key, ['name', 'is_active'])) continue;
                 $memberStats[$key] = round(($val / $meetingsCount) * 100);
             }
-
             $this->members_monthly_stats[] = $memberStats;
         }
 
@@ -290,7 +304,6 @@ class ReportForm extends Component
             'visitation_hours' => $this->type == 'weekly' ? 'nullable|numeric|min:0' : 'nullable',
         ]);
 
-        // التعديل الأول: تخزين التقرير الجديد في متغير لكي نستطيع سحب الـ ID الخاص به
         $newReport = Report::create([
             'family_id' => $this->family->id,
             'type' => $this->type,
@@ -305,7 +318,6 @@ class ReportForm extends Component
         ]);
 
         try {
-            // جلب الادمن
             $tokens = array_unique(User::where('role', 'admin')
                 ->whereNotNull('fcm_token')
                 ->where('fcm_token', '!=', '')
@@ -318,8 +330,6 @@ class ReportForm extends Component
 
                 $userName = Auth::user()->name;
                 $reportTypeAr = $this->type == 'weekly' ? 'الأسبوعي' : 'الشهري';
-
-                // التعديل الثاني: استخدام $newReport->id بدلاً من $this->id
                 $reportUrl = route('report.view', $newReport->id, true);
 
                 $message = CloudMessage::new()
@@ -327,75 +337,123 @@ class ReportForm extends Component
                         'تقرير جديد 📝',
                         "تم ارسال تقرير {$reportTypeAr} بواسطة {$userName}."
                     ))
-                    // 👈 إخبار المتصفح بالرابط عند الضغط
                     ->withWebPushConfig(WebPushConfig::fromArray([
-                        'fcm_options' => [
-                            'link' => $reportUrl
-                        ]
+                        'fcm_options' => ['link' => $reportUrl]
                     ]));
 
                 $messaging->sendMulticast($message, $tokens);
             }
         } catch (\Throwable $e) {
-            // تجاهل الخطأ حتى لا يتم إيقاف عمل السيرفر إذا فشل الإرسال
             Log::error('Firebase Notification Error (New Report): ' . $e->getMessage());
         }
 
         return redirect()->route('leader.reports')->with('message', 'تم إرسال التقرير بنجاح ✅');
     }
 
-    public function saveAdminReply()
+    /**
+     * This function is now used by BOTH Admin and Leader to save their replies
+     */
+    public function saveReplies()
     {
-        if (Auth::user()->role !== 'admin') abort(403);
-
         $report = Report::find($this->reportId);
+        if (!$report) return;
 
-        $report->update([
-            'timeline' => $this->type == 'weekly' ? $this->timeline : null,
-            'weekly_achievements' => $this->type == 'weekly' ? $this->weekly_achievements : null,
-            'monthly_summary' => $this->type == 'monthly' ? $this->monthly_summary : null,
-            'priest_message' => $this->priest_message,
-            'members_notes' => $this->members_notes,
-            'admin_reply' => $this->admin_general_reply,
-            'admin_reply_at' => now(),
-        ]);
+        $hasNewReplies = false;
+        $userRole = Auth::user()->role;
+        $userName = Auth::user()->name;
 
-        // إرسال إشعار Firebase للخادم (قائد العائلة)
-        try {
-            // جلب المستخدمين التابعين لهذه العائلة (الخدام) ولديهم توكن صالح
-            $tokens = array_unique(User::where('family_id', $report->family_id)
-                ->whereNotNull('fcm_token')
-                ->where('fcm_token', '!=', '')
-                ->pluck('fcm_token')
-                ->toArray());
-
-            if (!empty($tokens)) {
-                $factory = (new Factory)->withServiceAccount(storage_path('app/firebase-auth.json'));
-                $messaging = $factory->createMessaging();
-
-                $adminName = Auth::user()->name;
-                $reportTypeAr = $this->type == 'weekly' ? 'الأسبوعي' : 'الشهري';
-
-                // 👈 توليد رابط كامل يبدأ بـ https
-                $reportUrl = route('report.view', $report->id, true);
-
-                $message = CloudMessage::new()
-                    ->withNotification(Notification::create(
-                        'رد جديد على التقرير 📝',
-                        "تم الرد على تقريرك {$reportTypeAr} بواسطة {$adminName}."
-                    ))
-                    // 👈 إخبار المتصفح بالرابط عند الضغط
-                    ->withWebPushConfig(WebPushConfig::fromArray([
-                        'fcm_options' => [
-                            'link' => $reportUrl
-                        ]
-                    ]));
-
-                $messaging->sendMulticast($message, $tokens);
+        // Loop through all sections and append any text in 'new_reply' to the 'replies' array
+        $sections = ['timeline', 'weekly_achievements', 'monthly_summary', 'priest_message'];
+        foreach ($sections as $section) {
+            if (is_array($this->$section)) {
+                foreach ($this->$section as &$item) {
+                    if (!empty($item['new_reply'])) {
+                        $item['replies'][] = [
+                            'role' => $userRole,
+                            'name' => $userName,
+                            'text' => $item['new_reply'],
+                            'date' => now()->toDateTimeString()
+                        ];
+                        $item['new_reply'] = ''; // Clear input after appending
+                        $hasNewReplies = true;
+                    }
+                }
             }
-        } catch (\Throwable $e) {
-            // تجاهل الخطأ حتى لا يتم إيقاف عمل السيرفر إذا فشل الإرسال
-            Log::error('Firebase Notification Error (Admin Reply): ' . $e->getMessage());
+        }
+
+        // Do the same for members_notes
+        if (is_array($this->members_notes)) {
+            foreach ($this->members_notes as $memberId => &$note) {
+                if (!empty($note['new_reply'])) {
+                    $note['replies'][] = [
+                        'role' => $userRole,
+                        'name' => $userName,
+                        'text' => $note['new_reply'],
+                        'date' => now()->toDateTimeString()
+                    ];
+                    $note['new_reply'] = '';
+                    $hasNewReplies = true;
+                }
+            }
+        }
+
+        if ($hasNewReplies) {
+            $report->update([
+                'timeline' => $this->type == 'weekly' ? $this->timeline : null,
+                'weekly_achievements' => $this->type == 'weekly' ? $this->weekly_achievements : null,
+                'monthly_summary' => $this->type == 'monthly' ? $this->monthly_summary : null,
+                'priest_message' => $this->priest_message,
+                'members_notes' => $this->type == 'monthly' ? $this->members_notes : null,
+                // Only update admin_reply_at if the replier is an admin
+                'admin_reply_at' => $userRole === 'admin' ? now() : $report->admin_reply_at,
+            ]);
+
+            // Notify Logic
+            try {
+                $tokens = [];
+                $title = '';
+                $body = '';
+
+                if ($userRole === 'admin') {
+                    // Notify Leader(s) of this family
+                    $tokens = User::where('family_id', $report->family_id)
+                        ->whereNotNull('fcm_token')
+                        ->where('fcm_token', '!=', '')
+                        ->pluck('fcm_token')
+                        ->toArray();
+
+                    $title = 'رد جديد على التقرير 📝';
+                    $body = "تم الرد على تقريرك بواسطة {$userName}.";
+                } else {
+                    // Notify Admins
+                    $tokens = User::where('role', 'admin')
+                        ->whereNotNull('fcm_token')
+                        ->where('fcm_token', '!=', '')
+                        ->pluck('fcm_token')
+                        ->toArray();
+
+                    $title = 'تعقيب جديد من القائد 📝';
+                    $body = "قام {$userName} بالرد على ملاحظات التقرير.";
+                }
+
+                $tokens = array_unique($tokens);
+
+                if (!empty($tokens)) {
+                    $factory = (new Factory)->withServiceAccount(storage_path('app/firebase-auth.json'));
+                    $messaging = $factory->createMessaging();
+                    $reportUrl = route('report.view', $report->id, true);
+
+                    $message = CloudMessage::new()
+                        ->withNotification(Notification::create($title, $body))
+                        ->withWebPushConfig(WebPushConfig::fromArray([
+                            'fcm_options' => ['link' => $reportUrl]
+                        ]));
+
+                    $messaging->sendMulticast($message, $tokens);
+                }
+            } catch (\Throwable $e) {
+                Log::error('Firebase Notification Error (Reply): ' . $e->getMessage());
+            }
         }
 
         session()->flash('message', 'تم حفظ الردود بنجاح ✅');

@@ -5,7 +5,7 @@
         <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
             <div class="flex flex-col justify-between gap-4 py-4 md:flex-row md:items-center md:h-20">
                 <div class="flex items-center gap-4">
-                <a href="{{ Auth::user()->role == 'admin'? route('admin.reports'): route('leader.reports') }}" wire:navigate class="flex items-center justify-center w-12 h-12 text-gray-700 transition-colors bg-gray-100 rounded-2xl hover:bg-gray-200" aria-label="عودة">
+                    <a href="{{ Auth::user()->role == 'admin'? route('admin.reports'): route('leader.reports') }}" wire:navigate class="flex items-center justify-center w-12 h-12 text-gray-700 transition-colors bg-gray-100 rounded-2xl hover:bg-gray-200" aria-label="عودة">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
                     </a>
                     <div>
@@ -16,11 +16,12 @@
                     </div>
                 </div>
 
-                @if($isReadOnly && Auth::user()->role == 'admin')
-                    <button wire:click="saveAdminReply"
+                <!-- زر الحفظ أصبح يظهر للجميع في وضع القراءة -->
+                @if($isReadOnly)
+                    <button wire:click="saveReplies"
                             class="flex items-center gap-2 px-6 py-3 font-bold text-white transition-transform bg-green-600 shadow-lg hover:bg-green-700 rounded-xl shadow-green-200 active:scale-95">
-                        <span wire:loading.remove wire:target="saveAdminReply">حفظ الردود</span>
-                        <span wire:loading wire:target="saveAdminReply">جاري الحفظ...</span>
+                        <span wire:loading.remove wire:target="saveReplies">حفظ الردود</span>
+                        <span wire:loading wire:target="saveReplies">جاري الحفظ...</span>
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
                     </button>
                 @endif
@@ -50,7 +51,7 @@
                     </h3>
                     <div class="space-y-4">
                         @foreach($timeline as $index => $row)
-                            <div class="flex flex-col gap-3 group {{ $isReadOnly && Auth::user()->role == 'admin' ? 'p-4 border-2 border-indigo-100 bg-indigo-50/30 rounded-2xl' : '' }}">
+                            <div class="flex flex-col gap-3 group {{ $isReadOnly ? 'p-4 border-2 border-indigo-100 bg-indigo-50/30 rounded-2xl' : '' }}">
                                 <div class="flex items-center gap-3">
                                     @if(!$isReadOnly)
                                         <input type="text" wire:model="timeline.{{ $index }}.time" placeholder="6-6:30"
@@ -73,24 +74,29 @@
                                     @endif
                                 </div>
 
-                                <!-- Reply Section for Timeline -->
+                                <!-- Threaded Replies -->
                                 @if($isReadOnly)
-                                    @if(Auth::user()->role == 'admin')
-                                        <div class="flex items-start gap-3 pt-2 mt-1 border-t border-indigo-200/50">
-                                            <div class="px-2 py-1 mt-2 text-xs font-black text-indigo-800 bg-indigo-200 rounded">رد:</div>
-                                            <textarea wire:model="timeline.{{ $index }}.reply" rows="2"
-                                                      class="flex-grow p-3 text-sm font-medium bg-white border-2 border-indigo-200 rounded-xl focus:border-indigo-500 focus:ring-indigo-500"
-                                                      placeholder="تعليق على الفقرة..."></textarea>
-                                        </div>
-                                    @elseif(!empty($row['reply']))
-                                        <div class="flex items-start gap-3 p-4 mt-2 border border-indigo-100 bg-indigo-50 rounded-xl">
-                                            <div class="flex items-center justify-center flex-shrink-0 w-8 h-8 text-indigo-800 bg-indigo-200 rounded-full">✍️</div>
+                                    @foreach($row['replies'] ?? [] as $reply)
+                                        <div class="flex items-start gap-3 p-4 mt-2 rounded-xl {{ $reply['role'] == 'admin' ? 'bg-indigo-100 border border-indigo-200' : 'bg-green-100 border border-green-200' }}">
+                                            <div class="flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-full {{ $reply['role'] == 'admin' ? 'text-indigo-800 bg-indigo-200' : 'text-green-800 bg-green-200' }}">
+                                                {{ $reply['role'] == 'admin' ? '👨‍💼' : '👤' }}
+                                            </div>
                                             <div>
-                                                <span class="block mb-1 text-xs font-black tracking-wider text-indigo-800 uppercase">تعليق الإدارة</span>
-                                                <p class="text-sm font-bold leading-relaxed text-indigo-900">{{ $row['reply'] }}</p>
+                                                <span class="block mb-1 text-xs font-black tracking-wider uppercase {{ $reply['role'] == 'admin' ? 'text-indigo-800' : 'text-green-800' }}">
+                                                    {{ $reply['name'] ?? ($reply['role'] == 'admin' ? 'الإدارة' : 'القائد') }}
+                                                </span>
+                                                <p class="text-sm font-bold leading-relaxed {{ $reply['role'] == 'admin' ? 'text-indigo-900' : 'text-green-900' }}">{{ $reply['text'] }}</p>
                                             </div>
                                         </div>
-                                    @endif
+                                    @endforeach
+
+                                    <!-- Input for NEW reply -->
+                                    <div class="flex items-start gap-3 pt-2 mt-1 border-t border-indigo-200/50">
+                                        <div class="px-2 py-1 mt-2 text-xs font-black text-indigo-800 bg-indigo-200 rounded">رد جديد:</div>
+                                        <textarea wire:model="timeline.{{ $index }}.new_reply" rows="2"
+                                                  class="flex-grow p-3 text-sm font-medium bg-white border-2 border-indigo-200 rounded-xl focus:border-indigo-500 focus:ring-indigo-500"
+                                                   placeholder="تعليق على الفقرة..."></textarea>
+                                    </div>
                                 @endif
                             </div>
                         @endforeach
@@ -136,7 +142,7 @@
 
                 <div class="space-y-6">
                     @foreach($weekly_achievements as $index => $item)
-                        <div class="group bg-gray-50 p-5 rounded-2xl border-2 {{ $isReadOnly && Auth::user()->role == 'admin' ? 'border-green-200 bg-green-50/30' : 'border-gray-200' }}">
+                        <div class="group bg-gray-50 p-5 rounded-2xl border-2 {{ $isReadOnly ? 'border-green-200 bg-green-50/30' : 'border-gray-200' }}">
                             @if(!$isReadOnly)
                                 <div class="flex items-start gap-3">
                                     <div class="mt-3 text-xl font-black text-green-500">•</div>
@@ -160,23 +166,29 @@
                                 </div>
                             @endif
 
+                            <!-- Threaded Replies -->
                             @if($isReadOnly)
-                                @if(Auth::user()->role == 'admin')
-                                    <div class="flex items-start gap-3 pt-3 mt-4 border-t border-green-200/50">
-                                        <div class="px-2 py-1 mt-2 text-xs font-black text-green-800 bg-green-200 rounded">رد:</div>
-                                        <textarea wire:model="weekly_achievements.{{ $index }}.reply" rows="2"
-                                                  class="flex-grow p-3 text-sm font-medium bg-white border-2 border-green-200 rounded-xl focus:border-green-500 focus:ring-green-500"
-                                                  placeholder="اكتب ردك هنا..."></textarea>
-                                    </div>
-                                @elseif(!empty($item['reply']))
-                                    <div class="flex items-start gap-3 p-4 mt-4 bg-green-100 border border-green-200 rounded-xl">
-                                        <div class="flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-800 bg-green-200 rounded-full">✍️</div>
+                                @foreach($item['replies'] ?? [] as $reply)
+                                    <div class="flex items-start gap-3 p-4 mt-4 rounded-xl {{ $reply['role'] == 'admin' ? 'bg-indigo-100 border border-indigo-200' : 'bg-green-100 border border-green-200' }}">
+                                        <div class="flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-full {{ $reply['role'] == 'admin' ? 'text-indigo-800 bg-indigo-200' : 'text-green-800 bg-green-200' }}">
+                                            {{ $reply['role'] == 'admin' ? '👨‍💼' : '👤' }}
+                                        </div>
                                         <div>
-                                            <span class="block mb-1 text-xs font-black tracking-wider text-green-800 uppercase">الرد </span>
-                                            <p class="text-sm font-bold leading-relaxed text-green-900">{{ $item['reply'] }}</p>
+                                            <span class="block mb-1 text-xs font-black tracking-wider uppercase {{ $reply['role'] == 'admin' ? 'text-indigo-800' : 'text-green-800' }}">
+                                                {{ $reply['name'] ?? ($reply['role'] == 'admin' ? 'الإدارة' : 'القائد') }}
+                                            </span>
+                                            <p class="text-sm font-bold leading-relaxed {{ $reply['role'] == 'admin' ? 'text-indigo-900' : 'text-green-900' }}">{{ $reply['text'] }}</p>
                                         </div>
                                     </div>
-                                @endif
+                                @endforeach
+
+                                <!-- Input for NEW reply -->
+                                <div class="flex items-start gap-3 pt-3 mt-4 border-t border-green-200/50">
+                                    <div class="px-2 py-1 mt-2 text-xs font-black text-green-800 bg-green-200 rounded">رد جديد:</div>
+                                    <textarea wire:model="weekly_achievements.{{ $index }}.new_reply" rows="2"
+                                              class="flex-grow p-3 text-sm font-medium bg-white border-2 border-green-200 rounded-xl focus:border-green-500 focus:ring-green-500"
+                                              placeholder="اكتب ردك هنا..."></textarea>
+                                </div>
                             @endif
                         </div>
                     @endforeach
@@ -242,36 +254,36 @@
                             <div class="overflow-x-auto">
                                 <table class="w-full text-sm text-center">
                                     <thead class="text-xs font-bold tracking-wider uppercase bg-black/20 text-white/80">
-                                        <tr>
-                                            <th class="p-4 text-right min-w-[140px]">الاسم</th>
-                                            <th class="p-4">حضور</th>
-                                            <th class="p-4">نوتة</th>
-                                            <th class="p-4">قداس</th>
-                                            <th class="p-4">عشية وتسبحة</th>
-                                            <th class="p-4">مشاركة الخلوة</th>
-                                            <th class="p-4">قراءة</th>
-                                            <th class="p-4">تدريب التلمذة</th>
-                                            <th class="p-4">مذبح عائلى</th>
-                                            <th class="p-4">خلوة اسبوعية</th>
-                                            <th class="p-4">سماع العظة</th>
-                                        </tr>
+                                    <tr>
+                                        <th class="p-4 text-right min-w-[140px]">الاسم</th>
+                                        <th class="p-4">حضور</th>
+                                        <th class="p-4">نوتة</th>
+                                        <th class="p-4">قداس</th>
+                                        <th class="p-4">عشية وتسبحة</th>
+                                        <th class="p-4">مشاركة الخلوة</th>
+                                        <th class="p-4">قراءة</th>
+                                        <th class="p-4">تدريب التلمذة</th>
+                                        <th class="p-4">مذبح عائلى</th>
+                                        <th class="p-4">خلوة اسبوعية</th>
+                                        <th class="p-4">سماع العظة</th>
+                                    </tr>
                                     </thead>
                                     <tbody class="font-medium divide-y divide-white/10 text-white/90">
-                                        @foreach($members_monthly_stats as $stat)
-                                            <tr class="hover:bg-white/5 transition-colors {{ !$stat['is_active'] ? 'opacity-50 bg-black/10' : '' }}">
-                                                <td class="p-3 font-bold text-right whitespace-nowrap">{{ $stat['name'] }}</td>
-                                                <td class="p-3 font-bold">{{ $stat['attendance'] }}%</td>
-                                                <td class="p-3">{{ $stat['note_score'] }}%</td>
-                                                <td class="p-3">{{ $stat['has_mass'] }}%</td>
-                                                <td class="p-3">{{ $stat['has_tasbeha'] }}%</td>
-                                                <td class="p-3">{{ $stat['kholwa_count'] }}%</td>
-                                                <td class="p-3">{{ $stat['has_reading'] }}%</td>
-                                                <td class="p-3 font-bold text-yellow-300">{{ $stat['talmaza_training_count'] }}%</td>
-                                                <td class="p-3">{{ $stat['has_family_altar'] }}%</td>
-                                                <td class="p-3">{{ $stat['has_weekly_kholwa'] }}%</td>
-                                                <td class="p-3">{{ $stat['has_sermon'] }}%</td>
-                                            </tr>
-                                        @endforeach
+                                    @foreach($members_monthly_stats as $stat)
+                                        <tr class="hover:bg-white/5 transition-colors {{ !$stat['is_active'] ? 'opacity-50 bg-black/10' : '' }}">
+                                            <td class="p-3 font-bold text-right whitespace-nowrap">{{ $stat['name'] }}</td>
+                                            <td class="p-3 font-bold">{{ $stat['attendance'] }}%</td>
+                                            <td class="p-3">{{ $stat['note_score'] }}%</td>
+                                            <td class="p-3">{{ $stat['has_mass'] }}%</td>
+                                            <td class="p-3">{{ $stat['has_tasbeha'] }}%</td>
+                                            <td class="p-3">{{ $stat['kholwa_count'] }}%</td>
+                                            <td class="p-3">{{ $stat['has_reading'] }}%</td>
+                                            <td class="p-3 font-bold text-yellow-300">{{ $stat['talmaza_training_count'] }}%</td>
+                                            <td class="p-3">{{ $stat['has_family_altar']}}%</td>
+                                            <td class="p-3">{{ $stat['has_weekly_kholwa'] }}%</td>
+                                            <td class="p-3">{{ $stat['has_sermon'] }}%</td>
+                                        </tr>
+                                    @endforeach
                                     </tbody>
                                 </table>
                             </div>
@@ -313,23 +325,29 @@
                                 </div>
                             @endif
 
+                            <!-- Threaded Replies -->
                             @if($isReadOnly)
-                                @if(Auth::user()->role == 'admin')
-                                    <div class="flex items-start gap-3 pt-3 mt-4 border-t border-orange-200/50">
-                                        <div class="px-2 py-1 mt-2 text-xs font-black text-orange-800 bg-orange-200 rounded">رد:</div>
-                                        <textarea wire:model="monthly_summary.{{ $index }}.reply" rows="2"
-                                                  class="flex-grow p-3 text-sm font-medium bg-white border-2 border-orange-200 rounded-xl focus:border-orange-500 focus:ring-orange-500"
-                                                  placeholder="تعليق ..."></textarea>
-                                    </div>
-                                @elseif(!empty($item['reply']))
-                                    <div class="flex items-start gap-3 p-4 mt-4 bg-orange-100 border border-orange-200 rounded-xl">
-                                        <div class="flex items-center justify-center flex-shrink-0 w-8 h-8 text-orange-800 bg-orange-200 rounded-full">✍️</div>
+                                @foreach($item['replies'] ?? [] as $reply)
+                                    <div class="flex items-start gap-3 p-4 mt-4 rounded-xl {{ $reply['role'] == 'admin' ? 'bg-indigo-100 border border-indigo-200' : 'bg-orange-100 border border-orange-200' }}">
+                                        <div class="flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-full {{ $reply['role'] == 'admin' ? 'text-indigo-800 bg-indigo-200' : 'text-orange-800 bg-orange-200' }}">
+                                            {{ $reply['role'] == 'admin' ? '👨‍💼' : '👤' }}
+                                        </div>
                                         <div>
-                                            <span class="block mb-1 text-xs font-black tracking-wider text-orange-800 uppercase">تعليق</span>
-                                            <p class="text-sm font-bold leading-relaxed text-orange-900">{{ $item['reply'] }}</p>
+                                            <span class="block mb-1 text-xs font-black tracking-wider uppercase {{ $reply['role'] == 'admin' ? 'text-indigo-800' : 'text-orange-800' }}">
+                                                {{ $reply['name'] ?? ($reply['role'] == 'admin' ? 'الإدارة' : 'القائد') }}
+                                            </span>
+                                            <p class="text-sm font-bold leading-relaxed {{ $reply['role'] == 'admin' ? 'text-indigo-900' : 'text-orange-900' }}">{{ $reply['text'] }}</p>
                                         </div>
                                     </div>
-                                @endif
+                                @endforeach
+
+                                <!-- Input for NEW reply -->
+                                <div class="flex items-start gap-3 pt-3 mt-4 border-t border-orange-200/50">
+                                    <div class="px-2 py-1 mt-2 text-xs font-black text-orange-800 bg-orange-200 rounded">رد جديد:</div>
+                                    <textarea wire:model="monthly_summary.{{ $index }}.new_reply" rows="2"
+                                              class="flex-grow p-3 text-sm font-medium bg-white border-2 border-orange-200 rounded-xl focus:border-orange-500 focus:ring-orange-500"
+                                              placeholder="تعليق ..."></textarea>
+                                </div>
                             @endif
                         </div>
                     @endforeach
@@ -360,7 +378,7 @@
                                         {{ mb_substr($member->name, 0, 1) }}
                                     </div>
                                     <span class="text-sm font-bold text-gray-900 {{ !$member->is_active ? 'line-through opacity-50' : '' }}">
-                                        {{ $member->name }}
+{{ $member->name }}
                                     </span>
                                 </div>
 
@@ -374,20 +392,22 @@
                                     </div>
                                 @endif
 
+                                <!-- Threaded Replies for Member Notes -->
                                 @if($isReadOnly && !empty($members_notes[$member->id]['text']))
-                                    @if(Auth::user()->role == 'admin')
-                                        <div class="flex items-start gap-2 mt-3">
-                                            <span class="text-[10px] bg-red-100 text-red-800 font-black px-2 py-1 rounded mt-1">توجيه:</span>
-                                            <textarea wire:model="members_notes.{{ $member->id }}.reply" rows="2"
-                                                      class="w-full p-2 text-xs font-medium border-red-200 rounded-lg focus:ring-red-500 bg-red-50"
-                                                      placeholder="رد خاص..."></textarea>
+                                    @foreach($members_notes[$member->id]['replies'] ?? [] as $reply)
+                                        <div class="flex gap-2 p-3 mt-3 text-xs border rounded-lg {{ $reply['role'] == 'admin' ? 'border-red-100 bg-red-50' : 'border-indigo-100 bg-indigo-50' }}">
+                                            <span class="font-black shrink-0 {{ $reply['role'] == 'admin' ? 'text-red-800' : 'text-indigo-800' }}"> رد ({{ $reply['name'] ?? 'الإدارة' }}):</span>
+                                            <span class="font-bold {{ $reply['role'] == 'admin' ? 'text-red-900' : 'text-indigo-900' }}">{{ $reply['text'] }}</span>
                                         </div>
-                                    @elseif(!empty($members_notes[$member->id]['reply']))
-                                        <div class="flex gap-2 p-3 mt-3 text-xs border border-red-100 rounded-lg bg-red-50">
-                                            <span class="font-black text-red-800 shrink-0">توجيه:</span>
-                                            <span class="font-bold text-red-900">{{ $members_notes[$member->id]['reply'] }}</span>
-                                        </div>
-                                    @endif
+                                    @endforeach
+
+                                    <!-- Input for NEW reply -->
+                                    <div class="flex items-start gap-2 mt-3">
+                                        <span class="text-[10px] bg-red-100 text-red-800 font-black px-2 py-1 rounded mt-1">رد:</span>
+                                        <textarea wire:model="members_notes.{{ $member->id }}.new_reply" rows="2"
+                                                  class="w-full p-2 text-xs font-medium border-red-200 rounded-lg focus:ring-red-500 bg-red-50"
+                                                  placeholder="رد إضافي..."></textarea>
+                                    </div>
                                 @endif
                             </div>
                         @endif
@@ -411,7 +431,7 @@
                                 <div class="w-full">
                                     <textarea wire:model="priest_message.{{ $index }}.text" rows="3"
                                               class="w-full p-4 text-base font-medium leading-relaxed placeholder-blue-300 bg-white border-2 border-blue-200 rounded-xl focus:ring-blue-500 focus:border-blue-500"
-                                              placeholder="اكتب رسالتك..."></textarea>
+                                               placeholder="اكتب رسالتك..."></textarea>
                                     <div class="flex justify-end mt-2">
                                         <button wire:click="removeItem('priest_message', {{ $index }})"
                                                 class="text-red-500 hover:text-red-700 text-xs font-bold flex items-center gap-1 transition-colors bg-white px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-red-50 hover:border-red-200 shadow-sm">
@@ -425,23 +445,29 @@
                             <p class="text-base font-bold leading-relaxed text-gray-900">{{ $item['text'] }}</p>
                         @endif
 
+                        <!-- Threaded Replies -->
                         @if($isReadOnly)
-                            @if(Auth::user()->role == 'admin')
-                                <div class="flex items-start gap-3 pt-3 mt-4 border-t border-blue-200">
-                                    <div class="px-2 py-1 mt-2 text-xs font-black text-blue-800 bg-blue-200 rounded">رد:</div>
-                                    <textarea wire:model="priest_message.{{ $index }}.reply" rows="2"
-                                              class="flex-grow p-3 text-sm font-medium bg-white border-2 border-blue-200 rounded-xl focus:border-blue-500 focus:ring-blue-500"
-                                              placeholder="الرد على هذه الرسالة..."></textarea>
-                                </div>
-                            @elseif(!empty($item['reply']))
-                                <div class="flex items-start gap-3 p-4 mt-4 bg-blue-100 border border-blue-200 shadow-sm rounded-xl">
-                                    <div class="flex items-center justify-center flex-shrink-0 w-8 h-8 text-blue-800 bg-blue-200 rounded-full">💬</div>
+                            @foreach($item['replies'] ?? [] as $reply)
+                                <div class="flex items-start gap-3 p-4 mt-4 rounded-xl shadow-sm border {{ $reply['role'] == 'admin' ? 'bg-indigo-100 border-indigo-200' : 'bg-blue-100 border-blue-200' }}">
+                                    <div class="flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-full {{ $reply['role'] == 'admin' ? 'text-indigo-800 bg-indigo-200' : 'text-blue-800 bg-blue-200' }}">
+                                        💬
+                                    </div>
                                     <div>
-                                        <span class="block mb-1 text-xs font-black tracking-wider text-blue-800 uppercase">الرد</span>
-                                        <p class="text-sm font-bold leading-relaxed text-blue-900">{{ $item['reply'] }}</p>
+                                        <span class="block mb-1 text-xs font-black tracking-wider uppercase {{ $reply['role'] == 'admin' ? 'text-indigo-800' : 'text-blue-800' }}">
+                                            رد {{ $reply['name'] ?? ($reply['role'] == 'admin' ? 'الإدارة' : 'القائد') }}
+                                        </span>
+                                        <p class="text-sm font-bold leading-relaxed {{ $reply['role'] == 'admin' ? 'text-indigo-900' : 'text-blue-900' }}">{{ $reply['text'] }}</p>
                                     </div>
                                 </div>
-                            @endif
+                            @endforeach
+
+                            <!-- Input for NEW reply -->
+                            <div class="flex items-start gap-3 pt-3 mt-4 border-t border-blue-200">
+                                <div class="px-2 py-1 mt-2 text-xs font-black text-blue-800 bg-blue-200 rounded">رد جديد:</div>
+                                <textarea wire:model="priest_message.{{ $index }}.new_reply" rows="2"
+                                          class="flex-grow p-3 text-sm font-medium bg-white border-2 border-blue-200 rounded-xl focus:border-blue-500 focus:ring-blue-500"
+                                          placeholder="الرد على هذه الرسالة..."></textarea>
+                            </div>
                         @endif
                     </div>
                 @endforeach
