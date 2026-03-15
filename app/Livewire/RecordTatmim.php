@@ -49,7 +49,7 @@ class RecordTatmim extends Component
         // ----------------------------------
         $this->meeting = $meeting;
 
-        if ($meeting->status !== 'pending' && $meeting->created_at < Carbon::now()->subWeeks(2)) {
+        if ($meeting->status !== 'pending' && $meeting->created_at < Carbon::now()->subWeeks(4)) {
             $this->readonly = true;
         }
         // --------------------------------------------------
