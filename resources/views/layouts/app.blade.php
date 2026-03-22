@@ -99,7 +99,7 @@
             <!-- User Actions (Notifications & Profile) -->
             <div class="flex items-center gap-3">
                 <!-- Notifications -->
-                <a href="{{ route('notifications') }}" wire:navigate
+                <a href="{{ route('notifications') }}" id="notifications-bell-link" wire:navigate
                    class="relative flex items-center justify-center w-12 h-12 text-gray-600 transition-colors rounded-2xl hover:bg-gray-100 group"
                    aria-label="الإشعارات">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -158,7 +158,7 @@
             class="bg-white/90 backdrop-blur-xl rounded-3xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-white/50 p-3 space-y-2 ring-1 ring-gray-100">
             @if(Auth::check() && Auth::user()->role == 'admin')
                 <a href="{{ route('admin.add-family') }}" wire:navigate @click="openActionMenu = false"
-                                             class="flex items-center gap-4 p-4 transition-colors rounded-2xl hover:bg-indigo-50 active:scale-95 group">
+                   class="flex items-center gap-4 p-4 transition-colors rounded-2xl hover:bg-indigo-50 active:scale-95 group">
                     <div
                         class="flex items-center justify-center w-12 h-12 text-indigo-600 transition-colors bg-indigo-100 rounded-full group-hover:bg-indigo-600 group-hover:text-white">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -212,7 +212,7 @@
             </a>
         </div>
     </div>
-<!-- Bottom Navbar -->
+    <!-- Bottom Navbar -->
     <div
         class="bg-white/95 backdrop-blur-md border-t border-gray-200 flex justify-around items-end pb-3 pt-2 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] h-20">
 
@@ -265,12 +265,12 @@
                class="flex flex-col items-center gap-1 w-16 transition-all duration-300 {{ request()->routeIs('admin.reports') ? 'text-indigo-600 -translate-y-1' : 'text-gray-400 hover:text-gray-600' }}">
                 <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" stroke-width="{{ request()->routeIs('admin.reports') ? '3' : '2' }}"
-                    stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <polyline points="14 2 14 8 20 8" />
-                <line x1="16" y1="13" x2="8" y2="13" />
-                <line x1="16" y1="17" x2="8" y2="17" />
-                <polyline points="10 9 9 9 8 9" />
+                     stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                    <line x1="16" y1="17" x2="8" y2="17" />
+                    <polyline points="10 9 9 9 8 9" />
                 </svg>
                 <span class="text-[10px] font-bold">التقارير</span>
             </a>
@@ -313,7 +313,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
 
-        // 1. Your Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyB1EIwyQAuVb2D8m2zzQ6hTDZyp9_sJ5OI",
             authDomain: "talmaza-dc8e8.firebaseapp.com",
@@ -327,22 +326,35 @@
         const app = initializeApp(firebaseConfig);
         const messaging = getMessaging(app);
 
-        // 2. Request Permission & Get Token
-        function requestPushPermission() {
-            Notification.requestPermission().then((permission) => {
-                if (permission === 'granted') {
-                    getToken(messaging, { vapidKey: 'BMbAhU-OqwfUPAH2vGuPPGzuBv2X2vVz4870DioHyESkYCsAynbd71Pf9V3AUp-SRFch1z9_ppMYM5i5s_0utgo' }).then((currentToken) => {
-                       if (currentToken) {
-                            saveTokenToDatabase(currentToken);
-                        }
-                    }).catch((err) => {
-                        console.log('An error occurred while retrieving token. ', err);
-                    });
-                }
-            });
+        // ✅ منع تكرار إرسال نفس التوكن
+        let lastSentToken = null;
+
+        // ✅ طلب الإذن
+        async function requestPushPermission() {
+            const permission = await Notification.requestPermission();
+
+            if (permission === 'granted') {
+                await handleToken();
+            }
         }
 
-        // 3. Save Token to Laravel Backend
+        // ✅ الحصول على التوكن وحفظه
+        async function handleToken() {
+            try {
+                const currentToken = await getToken(messaging, {
+                    vapidKey: 'BMbAhU-OqwfUPAH2vGuPPGzuBv2X2vVz4870DioHyESkYCsAynbd71Pf9V3AUp-SRFch1z9_ppMYM5i5s_0utgo'
+                });
+
+                if (currentToken && currentToken !== lastSentToken) {
+                    lastSentToken = currentToken;
+                    saveTokenToDatabase(currentToken);
+                }
+            } catch (err) {
+                console.log('Error getting token:', err);
+            }
+        }
+
+        // ✅ إرسال التوكن للسيرفر
         function saveTokenToDatabase(token) {
             fetch('/save-fcm-token', {
                 method: 'POST',
@@ -354,10 +366,10 @@
             });
         }
 
-        // 4. Handle Foreground Messages (When user is active on the site)
+        // ✅ استقبال الإشعارات أثناء فتح الموقع
         onMessage(messaging, (payload) => {
             console.log('Message received in foreground ', payload);
-            // 👈 تعديل رسالة التنبيه لتقوم بالانتقال عند الموافقة
+
             if (confirm(payload.notification.title + "\n" + payload.notification.body + "\n\nهل تريد الذهاب للتفاصيل؟")) {
                 const targetLink = payload.fcmOptions?.link || payload.data?.link;
                 if (targetLink) {
@@ -366,9 +378,22 @@
             }
         });
 
-        // Ask for permission when page loads
-        document.addEventListener('DOMContentLoaded', () => {
-            requestPushPermission();
+        // ✅ عند تحميل الصفحة أو التنقل (لتوافق Livewire SPA)
+        document.addEventListener('livewire:navigated', async () => {
+            if (Notification.permission === 'granted') {
+                // المستخدم مفعل بالفعل
+                await handleToken();
+            } else if (Notification.permission === 'default') {
+                // ربط طلب الإذن بزر الإشعارات بدلاً من الظهور التلقائي
+                const bellIcon = document.getElementById('notifications-bell-link');
+                if (bellIcon) {
+                    bellIcon.addEventListener('click', async () => {
+                        await requestPushPermission();
+                    }, { once: true });
+                }
+            } else {
+                console.log('Notifications are blocked');
+            }
         });
     </script>
 @endif
