@@ -184,12 +184,14 @@
                                     $toggles = [
                                         'is_present' => ['label' => 'حضور', 'icon' => '🙋‍♂️'],
                                         'has_mass' => ['label' => 'القداس', 'icon' => '⛪'],
-                                        'has_tasbeha' => ['label' => 'تسبحة', 'icon' => '🕯️'],
+                                        'has_tasbeha' => ['label' => 'تسبحة', 'icon' => '️🎶'],
+                                        'has_vespers' =>['label' => 'عشية' , 'icon' => '🕯'],
                                         'has_weekly_kholwa' => ['label' => 'خلوة اسبوعية', 'icon' => '🧘‍♂️'],
                                         'has_servants_meeting' => ['label' => 'اجتماع الخدام', 'icon' => '🤝'],
                                         'has_reading' => ['label' => 'قراءة', 'icon' => '📖'],
                                         'has_family_altar' => ['label' => 'مذبح', 'icon' => '👨‍👩‍👧‍👦'],
                                         'has_sermon' => ['label' => 'عظة', 'icon' => '📺'],
+
                                         ];
                                 @endphp
 

@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
         <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-            <div class="flex flex-col justify-between gap-4 py-4 md:flex-row md:items-center md:h-20">
+            <div class="flex flex-col justify-between gap-4 py-4 md:flex-row md:items-start md:h-auto">
 
                 <div class="flex items-center gap-4">
                     <a href="{{ route('admin.dashboard') }}" wire:navigate
@@ -22,23 +22,43 @@
                 </div>
 
                 <!-- Filters -->
-                <div class="flex gap-2 pb-2 overflow-x-auto md:pb-0 no-scrollbar">
-                    <button wire:click="setFilter('all')"
-                            class="px-5 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all border-2 {{ $filter == 'all' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md' : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300' }}">
-                        الكل
-                    </button>
-                    <button wire:click="setFilter('pending')"
-                            class="px-5 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all border-2 flex items-center gap-2 {{ $filter == 'pending' ? 'bg-red-500 text-white border-red-500 shadow-md' : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300' }}">
-                        <span>⚠️</span> يحتاج لرد
-                    </button>
-                    <button wire:click="setFilter('weekly')"
-                            class="px-5 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all border-2 {{ $filter == 'weekly' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md' : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300' }}">
-                        أسبوعي 📅
-                    </button>
-                    <button wire:click="setFilter('monthly')"
-                            class="px-5 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all border-2 {{ $filter == 'monthly' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md' : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300' }}">
-                        شهري 📊
-                    </button>
+                <div class="flex flex-col gap-3">
+                    <!-- Type Filters -->
+                    <div class="flex gap-2 overflow-x-auto no-scrollbar">
+                        <button wire:click="setFilter('all')"
+                                class="px-5 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all border-2 {{ $filter == 'all' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md' : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300' }}">
+                            الكل
+                        </button>
+                        <button wire:click="setFilter('pending')"
+                                class="px-5 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all border-2 flex items-center gap-2 {{ $filter == 'pending' ? 'bg-red-500 text-white border-red-500 shadow-md' : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300' }}">
+                            <span>⚠️</span> يحتاج لرد
+                        </button>
+                        <button wire:click="setFilter('weekly')"
+                                class="px-5 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all border-2 {{ $filter == 'weekly' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md' : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300' }}">
+                            أسبوعي 📅
+                        </button>
+                        <button wire:click="setFilter('monthly')"
+                                class="px-5 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all border-2 {{ $filter == 'monthly' ? 'bg-indigo-600 text-white border-indigo-600 shadow-md' : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300' }}">
+                            شهري 📊
+                        </button>
+                    </div>
+
+                    <!-- Date Filters (Month & Year) -->
+                    <div class="flex gap-2 overflow-x-auto no-scrollbar">
+                        <select wire:model.live="filterYear" class="bg-gray-50 border-2 border-gray-200 text-gray-700 text-sm font-bold rounded-xl focus:ring-indigo-500 focus:border-indigo-500 py-2 px-4">
+                            @foreach($availableYears as $y)
+                                <option value="{{ $y }}">{{ $y }}</option>
+                            @endforeach
+                            <option value="all">كل السنين</option>
+                        </select>
+
+                        <select wire:model.live="filterMonth" class="bg-gray-50 border-2 border-gray-200 text-gray-700 text-sm font-bold rounded-xl focus:ring-indigo-500 focus:border-indigo-500 py-2 px-4">
+                            @for($i=1; $i<=12; $i++)
+                                <option value="{{ $i }}">{{ \Carbon\Carbon::create()->month($i)->locale('ar')->monthName }}</option>
+                            @endfor
+                            <option value="all">كل الشهور</option>
+                        </select>
+                    </div>
                 </div>
             </div>
         </div>
@@ -163,11 +183,11 @@
                         class="flex items-center justify-center w-24 h-24 mx-auto mb-6 text-5xl rounded-full opacity-50 bg-gray-50 grayscale">
                         📭</div>
                     <h3 class="mb-2 text-xl font-bold text-gray-800">صندوق الوارد فارغ</h3>
-                    <p class="text-gray-500">لا توجد تقارير مطابقة للفلتر الحالي</p>
-                    @if($filter !== 'all')
-                        <button wire:click="setFilter('all')"
+                    <p class="text-gray-500">لا توجد تقارير مطابقة للبحث أو للفلتر المختار</p>
+                    @if($filter !== 'all' || $filterMonth !== 'all' || $filterYear !== 'all')
+                        <button wire:click="setFilter('all'); $set('filterMonth', 'all'); $set('filterYear', 'all')"
                                 class="px-6 py-2 mt-6 font-bold text-indigo-600 transition-colors hover:underline bg-indigo-50 hover:bg-indigo-100 rounded-xl">عرض
-                            كل التقارير</button>
+                            كل التقارير والمواعيد</button>
                     @endif
                 </div>
             @endforelse
@@ -177,6 +197,47 @@
         <div class="flex justify-center mt-10">
             {{ $reports->links() }}
         </div>
+
+        <!-- Missing Monthly Reports Section -->
+        @if($filter === 'monthly')
+            <div class="pt-8 mt-16 border-t border-gray-200 animate-fade-in-up">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="flex items-center justify-center w-12 h-12 text-2xl text-red-600 bg-red-100 shadow-sm rounded-2xl">
+                        ⚠️
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-black text-gray-800">عائلات لم ترسل التقرير الشهري</h3>
+                        <p class="text-sm font-bold text-gray-500 mt-0.5">
+                            لشهر {{ $filterMonth !== 'all' ? \Carbon\Carbon::create()->month((int)$filterMonth)->locale('ar')->monthName : 'الكل' }}
+                            {{ $filterYear !== 'all' ? $filterYear : '' }}
+                        </p>
+                    </div>
+                    <span class="px-5 py-1 mr-auto text-sm font-bold text-red-700 bg-red-100 rounded-full">{{ $missingFamilies->count() }}  </span>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    @forelse($missingFamilies as $missingFamily)
+                        <div class="flex items-center justify-between p-5 bg-white border border-gray-100 shadow-sm rounded-2xl hover:border-red-200 transition-colors group">
+                            <div>
+                                <h4 class="text-lg font-bold text-gray-900">{{ $missingFamily->name }}</h4>
+                                <p class="flex items-center gap-1 mt-1 text-sm font-medium text-gray-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                    القائد: {{ $missingFamily->users->first()->name ?? 'غير محدد' }}
+                                </p>
+                            </div>
+
+
+                        </div>
+                    @empty
+                        <div class="py-12 text-center border-2 border-green-200 border-dashed col-span-full bg-green-50 rounded-2xl">
+                            <div class="mb-3 text-4xl">🎉</div>
+                            <h4 class="text-lg font-bold text-green-800">رائع جداً!</h4>
+                            <p class="font-medium text-green-600">جميع العائلات أرسلت التقرير الشهري لهذا التاريخ.</p>
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+        @endif
 
     </div>
 </div>

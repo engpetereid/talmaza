@@ -95,7 +95,7 @@
                     </span>
                     </div>
 
-                    <div class="grid grid-cols-4 gap-3 p-4 text-center sm:grid-cols-6 lg:grid-cols-11">
+                    <div class="grid grid-cols-4 gap-3 p-4 text-center sm:grid-cols-6 lg:grid-cols-12">
                         <div class="p-2 border border-blue-100 bg-blue-50 rounded-2xl">
                             <div class="text-[11px] text-gray-500 font-bold mb-1">حضور</div>
                             <div class="text-base font-black text-blue-700">{{ $data['family_averages']['attendance'] }}%</div>
@@ -115,6 +115,10 @@
                         <div class="p-2 border border-orange-200 bg-orange-50/50 rounded-2xl">
                             <div class="text-[11px] text-gray-500 font-bold mb-1">مشاركة الخلوة</div>
                             <div class="text-base font-black text-orange-600">{{ $data['family_averages']['kholwa'] }}%</div>
+                        </div>
+                        <div class="p-2 border border-indigo-100 bg-indigo-50/50 rounded-2xl">
+                            <div class="text-[11px] text-gray-500 font-bold mb-1">عشية</div>
+                            <div class="text-base font-black text-indigo-700">{{ $data['family_averages']['vespers'] }}%</div>
                         </div>
                         <div class="p-2 border border-indigo-100 bg-indigo-50/50 rounded-2xl">
                             <div class="text-[11px] text-gray-500 font-bold mb-1">تسبحة</div>
@@ -197,6 +201,10 @@
                             <div class="col-span-1">
                                 <div class="text-[10px] text-gray-400 font-bold">مشاركة خلوة</div>
                                 <div class="text-sm font-bold text-gray-700">{{ $stat['kholwa'] }}%</div>
+                            </div>
+                            <div class="col-span-1">
+                                <div class="text-[10px] text-gray-400 font-bold">عشية</div>
+                                <div class="text-sm font-bold text-gray-700">{{ $stat['vespers'] }}%</div>
                             </div>
                             <div class="col-span-1">
                                 <div class="text-[10px] text-gray-400 font-bold">تسبحة</div>

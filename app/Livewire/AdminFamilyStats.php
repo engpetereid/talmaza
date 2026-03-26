@@ -25,7 +25,8 @@ class AdminFamilyStats extends Component
         'mass' => ['label' => 'قداس', 'color' => '#ea580c'],
         'kholwa' => ['label' => 'مشاركة خلوة', 'color' => '#f97316'],
         'training' => ['label' => 'تلمذة', 'color' => '#ec4899'],
-        'tasbeha' => ['label' => 'عشية/تسبحة', 'color' => '#4f46e5'],
+        'tasbeha' => ['label' => 'تسبحة', 'color' => '#4f46e5'],
+        'vespers' => ['label' => 'عشية', 'color' => '#4f46e9'],
         'servants' => ['label' => 'اجتماع خدام', 'color' => '#16a34a'],
         'reading' => ['label' => 'قراءة', 'color' => '#0d9488'],
         'altar' => ['label' => 'مذبح', 'color' => '#dc2626'],
@@ -92,6 +93,7 @@ class AdminFamilyStats extends Component
                     if ($record->has_mass) $meetingSums['mass'] += 100;
                     if ($record->has_weekly_kholwa) $meetingSums['weekly_kholwa'] += 100;
                     if ($record->has_tasbeha)  $meetingSums['tasbeha'] += 100;
+                    if ($record->has_vespers)  $meetingSums['vespers'] += 100;
                     if ($record->has_servants_meeting) $meetingSums['servants'] += 100;
                     if ($record->has_reading) $meetingSums['reading'] += 100;
                     if ($record->has_family_altar) $meetingSums['altar'] += 100;
@@ -125,6 +127,7 @@ class AdminFamilyStats extends Component
                     if ($record->has_mass) $counters['mass'] += 100;
                     if ($record->has_weekly_kholwa) $counters['weekly_kholwa'] += 100;
                     if ($record->has_tasbeha) $counters['tasbeha'] += 100;
+                    if ($record->has_vespers) $counters['vespers'] += 100;
                     if ($record->has_servants_meeting) $counters['servants'] += 100;
                     if ($record->has_reading) $counters['reading'] += 100;
                     if ($record->has_family_altar) $counters['altar'] += 100;

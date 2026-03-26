@@ -28,6 +28,8 @@ class ReportForm extends Component
     public $timeline = [];
     public $weekly_achievements = [];
     public $visitation_hours;
+    public $visitation_replies = []; // 👈 متغير الردود على الافتقاد
+    public $visitation_new_reply = ''; // 👈 متغير الرد الجديد للافتقاد
 
     // --- Monthly Report Data ---
     public $report_date_input;
@@ -61,7 +63,10 @@ class ReportForm extends Component
             // Load & Normalize Data (Convert old single reply to replies array)
             $this->timeline = $this->normalizeSection($report->timeline ?? [['time' => '', 'activity' => '']]);
             $this->weekly_achievements = $this->normalizeSection($report->weekly_achievements ?? [['text' => '']]);
+
             $this->visitation_hours = $report->visitation_hours;
+            $this->visitation_replies = is_array($report->visitation_replies) ? $report->visitation_replies : []; // 👈 استرجاع الردود
+
             $this->monthly_summary = $this->normalizeSection($report->monthly_summary ?? [['text' => '']]);
             $this->stats_snapshot = $report->stats_snapshot ?? [];
             $this->report_date_input = Carbon::parse($report->report_date)->format('Y-m');
@@ -233,7 +238,7 @@ class ReportForm extends Component
             $memberStats = [
                 'name' => $member->name, 'is_active' => $member->is_active, 'attendance' => 0,
                 'note_score' => 0, 'has_mass' => 0, 'has_servants_meeting' => 0,
-                'has_tasbeha' => 0, 'has_reading' => 0, 'has_sermon' => 0,
+                'has_tasbeha' => 0, 'has_reading' => 0, 'has_sermon' => 0, 'has_vespers' => 0,
                 'has_family_altar' => 0, 'kholwa_count' => 0, 'talmaza_training_count' => 0,
                 'has_weekly_kholwa' => 0,
             ];
@@ -250,21 +255,25 @@ class ReportForm extends Component
 
                     $maxNote = max($meeting->max_note_score, 1);
                     $memberStats['note_score'] += ($record->note_score / $maxNote);
-                    if ($record->is_present) $globalSums['note'] += ($record->note_score / $maxNote);
+                     $globalSums['note'] += ($record->note_score / $maxNote);
 
-                    if ($record->has_mass) { $memberStats['has_mass']++; if ($record->is_present) $globalSums['mass']++; }
-                    if ($record->has_servants_meeting) { $memberStats['has_servants_meeting']++; if ($record->is_present) $globalSums['servants']++; }
-                    if ($record->has_vespers || $record->has_tasbeha) { $memberStats['has_tasbeha']++; if ($record->is_present) $globalSums['vespers']++; }
-                    if ($record->has_reading) { $memberStats['has_reading']++; if ($record->is_present) $globalSums['reading']++; }
-                    if ($record->has_family_altar) { $memberStats['has_family_altar']++; if ($record->is_present) $globalSums['altar']++; }
-                    if ($record->has_weekly_kholwa) { $memberStats['has_weekly_kholwa']++; if ($record->is_present) $globalSums['weekly_kholwa']++; }
-                    if ($record->has_sermon) { $memberStats['has_sermon']++; if ($record->is_present) $globalSums['sermon']++; }
+                    if ($record->has_mass) { $memberStats['has_mass']++; $globalSums['mass']++; }
+                    if ($record->has_servants_meeting) { $memberStats['has_servants_meeting']++; $globalSums['servants']++; }
+                    if ($record->has_tasbeha) { $memberStats['has_tasbeha']++;  $globalSums['tasbeha']++; }
+                    if ($record->has_vespers) { $memberStats['has_vespers']++;  $globalSums['vespers']++; }
+                    if ($record->has_reading) { $memberStats['has_reading']++;  $globalSums['reading']++; }
+                    if ($record->has_family_altar) { $memberStats['has_family_altar']++;  $globalSums['altar']++; }
+                    if ($record->has_weekly_kholwa) { $memberStats['has_weekly_kholwa']++; $globalSums['weekly_kholwa']++; }
+                    if ($record->has_sermon) { $memberStats['has_sermon']++;  $globalSums['sermon']++; }
 
-                    $memberStats['kholwa_count'] += min($record->kholwa_count / 7, 1);
-                    if ($record->kholwa_count > 3 && $record->is_present) $globalSums['kholwa']++;
+                    // Fix: Add fractions directly instead of just incrementing by 1
+                    $kholwaFraction = min($record->kholwa_count / 7, 1);
+                    $memberStats['kholwa_count'] += $kholwaFraction;
+                     $globalSums['kholwa'] += $kholwaFraction;
 
-                    $memberStats['talmaza_training_count'] += min($record->talmaza_training_count / 7, 1);
-                    if ($record->talmaza_training_count > 3 && $record->is_present) $globalSums['training']++;
+                    $trainingFraction = min($record->talmaza_training_count / 7, 1);
+                    $memberStats['talmaza_training_count'] += $trainingFraction;
+                     $globalSums['training'] += $trainingFraction;
                 }
             }
 
@@ -282,10 +291,9 @@ class ReportForm extends Component
         $avgs['attendance'] = round(($globalSums['attendance'] / $totalOpp) * 100);
         $avgs['note'] = $totalPresentCount > 0 ? round(($globalSums['note'] / $totalPresentCount) * 100) : 0;
 
-        $keys = ['kholwa', 'training', 'weekly_kholwa', 'mass', 'vespers', 'servants', 'reading', 'altar', 'tasbeha' ,'sermon'];
+        $keys = ['kholwa', 'training', 'weekly_kholwa', 'mass', 'vespers', 'servants', 'reading', 'altar', 'tasbeha', 'sermon'];
         foreach ($keys as $k) {
-            $srcKey = $k == 'vespers' ? 'vespers' : $k;
-            $avgs[$k] = round(($globalSums[$srcKey] / $totalOpp) * 100);
+            $avgs[$k] = round(($globalSums[$k] / $totalOpp) * 100);
         }
 
         $this->stats_snapshot = array_merge([
@@ -311,6 +319,7 @@ class ReportForm extends Component
             'timeline' => $this->type == 'weekly' ? $this->timeline : null,
             'weekly_achievements' => $this->type == 'weekly' ? $this->weekly_achievements : null,
             'visitation_hours' => $this->type == 'weekly' ? $this->visitation_hours : null,
+            'visitation_replies' => $this->type == 'weekly' ? [] : null, // 👈 الحقل الجديد
             'monthly_summary' => $this->type == 'monthly' ? $this->monthly_summary : null,
             'members_notes' => $this->type == 'monthly' ? $this->members_notes : null,
             'stats_snapshot' => $this->type == 'monthly' ? $this->stats_snapshot : null,
@@ -381,6 +390,18 @@ class ReportForm extends Component
             }
         }
 
+        // 👈 الرد على ساعات الافتقاد
+        if (!empty($this->visitation_new_reply)) {
+            $this->visitation_replies[] = [
+                'role' => $userRole,
+                'name' => $userName,
+                'text' => $this->visitation_new_reply,
+                'date' => now()->toDateTimeString()
+            ];
+            $this->visitation_new_reply = '';
+            $hasNewReplies = true;
+        }
+
         // Do the same for members_notes
         if (is_array($this->members_notes)) {
             foreach ($this->members_notes as $memberId => &$note) {
@@ -401,6 +422,7 @@ class ReportForm extends Component
             $report->update([
                 'timeline' => $this->type == 'weekly' ? $this->timeline : null,
                 'weekly_achievements' => $this->type == 'weekly' ? $this->weekly_achievements : null,
+                'visitation_replies' => $this->type == 'weekly' ? $this->visitation_replies : null, // 👈 حفظ الردود
                 'monthly_summary' => $this->type == 'monthly' ? $this->monthly_summary : null,
                 'priest_message' => $this->priest_message,
                 'members_notes' => $this->type == 'monthly' ? $this->members_notes : null,
@@ -459,6 +481,15 @@ class ReportForm extends Component
         session()->flash('message', 'تم حفظ الردود بنجاح ✅');
     }
 
+    public function closeReplies()
+    {
+        $report = Report::find($this->reportId);
+        $userRole = Auth::user()->role;
+        $report->update([
+            'admin_reply_at' => $userRole === 'admin' ? now() : $report->admin_reply_at,
+        ]);
+        session()->flash('message', 'تم الاغلاق بنجاح ✅');
+    }
     public function render()
     {
         return view('livewire.report-form');

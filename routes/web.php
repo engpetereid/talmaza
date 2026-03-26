@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\DecisionsBoard;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\EnsureAdmin;
 use App\Livewire\AboutMe;
@@ -29,6 +30,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', UserProfile::class)->name('profile');
     Route::get('/notifications', NotificationsList::class)->name('notifications');
     Route::get('/announcements', AnnouncementsBoard::class)->name('announcements');
+    Route::get('/decisions', DecisionsBoard::class)->name('decisions');
     Route::get('/lessons', LessonLibrary::class)->name('lessons.library');
 
 

@@ -188,6 +188,10 @@
                                 <div class="text-xs font-bold">{{ $stat['kholwa'] }}%</div>
                             </div>
                             <div class="col-span-1">
+                                <div class="text-[9px] text-gray-400 font-bold">عشية</div>
+                                <div class="text-xs font-bold">{{ $stat['vespers'] }}%</div>
+                            </div>
+                            <div class="col-span-1">
                                 <div class="text-[9px] text-gray-400 font-bold">تسبحة</div>
                                 <div class="text-xs font-bold">{{ $stat['tasbeha'] }}%</div>
                             </div>

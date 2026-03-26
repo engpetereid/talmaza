@@ -129,7 +129,8 @@ class MemberStats extends Component
             'attendance' => ['label' => 'الحضور', 'color' => '#2563eb', 'total' => 0, 'trend' => []],
             'note' => ['label' => 'النوتة', 'color' => '#9333ea', 'total' => 0, 'trend' => []],
             'mass' => ['label' => 'القداس', 'color' => '#ea580c', 'total' => 0, 'trend' => []],
-            'vespers' => ['label' => 'عشية/تسبحة', 'color' => '#4f46e5', 'total' => 0, 'trend' => []],
+            'tasbeha'=>['label' => 'التسبحة', 'color' => '#ea585c', 'total' => 0, 'trend' => []] ,
+            'vespers' => ['label' => 'عشية', 'color' => '#4f46e5', 'total' => 0, 'trend' => []],
             'servants' => ['label' => 'اجتماع خدام', 'color' => '#059669', 'total' => 0, 'trend' => []],
             'reading' => ['label' => 'القراءة', 'color' => '#0d9488', 'total' => 0, 'trend' => []],
             'altar' => ['label' => 'مذبح عائلي', 'color' => '#be185d', 'total' => 0, 'trend' => []],
@@ -151,8 +152,8 @@ class MemberStats extends Component
                 // 1. Boolean Metrics (Strict Check)
                 $calculatedScores['attendance'] = $record->is_present ? 100 : 0;
                 $calculatedScores['mass'] = $record->has_mass ? 100 : 0;
-                // Combine Vespers/Tasbeha if they are separate columns in DB
-                $calculatedScores['vespers'] = ($record->has_tasbeha || $record->has_vespers) ? 100 : 0;
+                $calculatedScores['tasbeha'] = $record->has_tasbeha  ? 100 : 0;
+                $calculatedScores['vespers'] = $record->has_vespers ? 100 : 0;
                 $calculatedScores['servants'] = $record->has_servants_meeting ? 100 : 0;
                 $calculatedScores['reading'] = $record->has_reading ? 100 : 0;
                 $calculatedScores['altar'] = $record->has_family_altar ? 100 : 0;

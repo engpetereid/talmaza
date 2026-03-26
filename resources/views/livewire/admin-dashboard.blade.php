@@ -87,9 +87,24 @@
                         </svg>
                     </div>
                     <div>
+                        <h3 class="text-lg font-bold text-gray-900 transition-colors group-hover:text-red-700">الإعلانات العامة
+                            </h3>
+                    </div>
+                </a>
+                <a href="{{ route('decisions') }}" wire:navigate
+                   class="flex items-center gap-4 p-6 transition-all bg-white border border-gray-100 shadow-sm group rounded-3xl hover:border-red-300 hover:shadow-md">
+                    <div
+                        class="flex items-center justify-center text-red-600 transition-colors w-14 h-14 rounded-2xl bg-red-50 group-hover:bg-red-600 group-hover:text-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="17 8 12 3 7 8" />
+                            <line x1="12" y1="3" x2="12" y2="15" />
+                        </svg>
+                    </div>
+                    <div>
                         <h3 class="text-lg font-bold text-gray-900 transition-colors group-hover:text-red-700">نشر
                             القرارات</h3>
-                        <p class="text-sm font-medium text-gray-500">الإعلانات العامة</p>
                     </div>
                 </a>
 

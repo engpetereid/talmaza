@@ -22,12 +22,14 @@ class TatmimRecord extends Model
         'kholwa_count',
         'talmaza_training_count',
         'has_weekly_kholwa',
-        'has_sermon'
+        'has_sermon',
+        'has_vespers'
     ];
 
     protected $casts = [
         'is_present' => 'boolean',
         'has_mass' => 'boolean',
+        'has_vespers' => 'boolean',
         'has_servants_meeting' => 'boolean',
         'has_tasbeha' => 'boolean',
         'has_reading' => 'boolean',

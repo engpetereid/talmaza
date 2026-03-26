@@ -115,6 +115,10 @@
                                 <div class="text-sm font-bold text-gray-700">{{ $stat['kholwa'] }}%</div>
                             </div>
                             <div class="col-span-1">
+                                <div class="text-[10px] text-gray-400 font-bold">عشية</div>
+                                <div class="text-sm font-bold text-gray-700">{{ $stat['vespers'] }}%</div>
+                            </div>
+                            <div class="col-span-1">
                                 <div class="text-[10px] text-gray-400 font-bold">تسبحة</div>
                                 <div class="text-sm font-bold text-gray-700">{{ $stat['tasbeha'] }}%</div>
                             </div>

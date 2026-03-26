@@ -14,6 +14,9 @@ class Announcement extends Model
         'title',
         'content',
         'attachment',
+        'type',
+        'status',
+        'admin_comment'
     ];
 
     public function user()
