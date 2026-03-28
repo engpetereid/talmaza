@@ -25,7 +25,7 @@ class LeaderReports extends Component
         // 2. Check Requirement: Does user have a PIN?
         if (!Auth::user()->report_pin) {
             session()->flash('pin-status','يرجى تعيين كود حماية للتقارير أولاً 🔒');
-            $this->redirect(route('dashboard'),navigate: true);
+            $this->redirect(route('profile'),navigate: true);
             return;
         }
     }
