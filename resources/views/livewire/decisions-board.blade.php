@@ -25,23 +25,25 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                     </div>
                 </div>
+                <div class="xs:grid-cols-2">
+                    <!-- Status Filter -->
+                    <select wire:model.live="filterStatus" class="bg-white border-2 border-gray-200 text-gray-700 text-sm font-bold rounded-xl focus:ring-indigo-500 focus:border-indigo-500 py-3 px-4">
+                        <option value="all">كل الحالات</option>
+                        <option value="pending">⏳ قيد المراجعة</option>
+                        <option value="implemented">✅ تم التنفيذ</option>
+                        <option value="postponed">🟠 مؤجل</option>
+                        <option value="not_implemented">❌ لم يتم التنفيذ</option>
+                    </select>
 
-                <!-- Status Filter -->
-                <select wire:model.live="filterStatus" class="bg-white border-2 border-gray-200 text-gray-700 text-sm font-bold rounded-xl focus:ring-indigo-500 focus:border-indigo-500 py-3 px-4">
-                    <option value="all">كل الحالات</option>
-                    <option value="pending">⏳ قيد المراجعة</option>
-                    <option value="implemented">✅ تم التنفيذ</option>
-                    <option value="postponed">🟠 مؤجل</option>
-                    <option value="not_implemented">❌ لم يتم التنفيذ</option>
-                </select>
 
-                <!-- Month Filter -->
-                <select wire:model.live="filterMonth" class="bg-white border-2 border-gray-200 text-gray-700 text-sm font-bold rounded-xl focus:ring-indigo-500 focus:border-indigo-500 py-3 px-4">
-                    <option value="all">كل الشهور</option>
-                    @for($i=1; $i<=12; $i++)
-                        <option value="{{ $i }}">{{ Carbon\Carbon::create()->month($i)->locale('ar')->monthName }}</option>
-                    @endfor
-                </select>
+                    <!-- Month Filter -->
+                    <select wire:model.live="filterMonth" class="bg-white border-2 border-gray-200 text-gray-700 text-sm font-bold rounded-xl focus:ring-indigo-500 focus:border-indigo-500 py-3 px-4">
+                        <option value="all">كل الشهور</option>
+                        @for($i=1; $i<=12; $i++)
+                            <option value="{{ $i }}">{{ Carbon\Carbon::create()->month($i)->locale('ar')->monthName }}</option>
+                        @endfor
+                    </select>
+                </div>
             </div>
         </div>
     </div>
