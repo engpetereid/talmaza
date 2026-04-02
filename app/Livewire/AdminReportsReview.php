@@ -61,7 +61,7 @@ class AdminReportsReview extends Component
     public function render()
     {
         // ترتيب التقارير حسب آخر نشاط (رد) لكي تصعد المحادثات النشطة للأعلى
-        $query = Report::with('family')->latest('updated_at');
+        $query = Report::with('family')->latest('created_at');
 
         // 1. تطبيق فلاتر الشهر والسنة على التقارير
         if ($this->filterMonth !== 'all') {
