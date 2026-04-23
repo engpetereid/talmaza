@@ -56,7 +56,7 @@
                             <div class="flex items-center gap-1">
                                 @if(!$isReadOnly)
                                     <input type="text" wire:model="timeline.{{ $index }}.time" placeholder="6-6:30" class="w-24 py-4 font-mono text-sm font-bold text-center border-2 border-gray-200 bg-white rounded-xl focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
-                                    <input type="text" wire:model="timeline.{{ $index }}.activity" placeholder="اكتب النشاط هنا..." class="flex-grow py-4 max-w-100 text-base font-bold border-2 border-gray-200 bg-white rounded-xl focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
+                                    <input type="text" wire:model="timeline.{{ $index }}.activity" placeholder="اكتب النشاط هنا..." class="flex-grow py-4 max-w-90 text-base font-bold border-2 border-gray-200 bg-white rounded-xl focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
                                     <button wire:click="removeTimelineRow({{ $index }})" class="flex items-center justify-center w-12 h-12 text-gray-400 transition-colors bg-white border border-gray-200 rounded-xl hover:text-red-600 hover:bg-red-50 hover:border-red-200">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                                     </button>
