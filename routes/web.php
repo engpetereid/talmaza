@@ -1,6 +1,8 @@
 <?php
 
 use App\Livewire\DecisionsBoard;
+use App\Livewire\MonthlyReportForm;
+use App\Livewire\WeeklyReportForm;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\EnsureAdmin;
 use App\Livewire\AboutMe;
@@ -34,9 +36,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/lessons', LessonLibrary::class)->name('lessons.library');
 
 
-    Route::get('/reports/create/{type}', ReportForm::class)->name('report.form');
+    Route::get('/reports/weekly/create', WeeklyReportForm::class)->name('report.weekly.create');
+    Route::get('/reports/weekly/view/{report}', WeeklyReportForm::class)->name('report.weekly.view');
 
-    Route::get('/reports/view/{report}', ReportForm::class)->name('report.view');
+    // روابط التقرير الشهري
+    Route::get('/reports/monthly/create', MonthlyReportForm::class)->name('report.monthly.create');
+    Route::get('/reports/monthly/view/{report}', MonthlyReportForm::class)->name('report.monthly.view');
+
 
 
     Route::get('/reports', LeaderReports::class)->name('leader.reports');

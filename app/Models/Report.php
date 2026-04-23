@@ -20,6 +20,9 @@ class Report extends Model
         'members_notes',
         'stats_snapshot',
         'priest_message',
+        'stats_replies',
+        'session_time',
+        'session_replies',
         'admin_reply',
         'admin_reply_at'
     ];

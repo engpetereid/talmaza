@@ -71,7 +71,7 @@
             <!-- Action Buttons Grid -->
             <div class="grid grid-cols-1 gap-6 mb-10 sm:grid-cols-2 animate-fade-in-down">
                 <!-- Weekly Report Button -->
-                <a href="{{ route('report.form', ['type' => 'weekly']) }}" wire:navigate class="flex items-center gap-5 p-6 transition-all bg-white border border-indigo-100 shadow-sm group rounded-3xl hover:border-indigo-400 hover:shadow-md active:scale-95">
+                <a href="{{ route('report.weekly.create') }}" wire:navigate class="flex items-center gap-5 p-6 transition-all bg-white border border-indigo-100 shadow-sm group rounded-3xl hover:border-indigo-400 hover:shadow-md active:scale-95">
                     <div class="flex items-center justify-center w-16 h-16 text-indigo-600 transition-colors border border-indigo-100 shadow-inner rounded-2xl bg-indigo-50 group-hover:bg-indigo-600 group-hover:text-white">
                         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="m9 16 2 2 4-4"/></svg>
                     </div>
@@ -82,7 +82,7 @@
                 </a>
 
                 <!-- Monthly Report Button -->
-                <a href="{{ route('report.form', ['type' => 'monthly']) }}" wire:navigate class="flex items-center gap-5 p-6 transition-all bg-white border border-orange-100 shadow-sm group rounded-3xl hover:border-orange-400 hover:shadow-md active:scale-95">
+                <a href="{{ route('report.monthly.create', ['type' => 'monthly']) }}" wire:navigate class="flex items-center gap-5 p-6 transition-all bg-white border border-orange-100 shadow-sm group rounded-3xl hover:border-orange-400 hover:shadow-md active:scale-95">
                     <div class="flex items-center justify-center w-16 h-16 text-orange-600 transition-colors border border-orange-100 shadow-inner rounded-2xl bg-orange-50 group-hover:bg-orange-500 group-hover:text-white">
                         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
                     </div>
@@ -117,7 +117,7 @@
                             @endif
 
                             <!-- Left Area (Clickable Link) -->
-                            <a href="{{ route('report.view', $report->id) }}" wire:navigate class="flex items-center flex-grow gap-4 pl-4">
+                            <a href="{{ $report->type == 'weekly' ? route('report.weekly.view',$report->id) : route('report.monthly.view', $report->id) }}" wire:navigate class="flex items-center flex-grow gap-4 pl-4">
                                 <div class="w-12 h-12 rounded-xl flex items-center justify-center text-xl shadow-sm border border-gray-100 {{ $report->type == 'weekly' ? 'bg-indigo-100 text-indigo-600' : 'bg-orange-100 text-orange-600' }}">
                                     {{ $report->type == 'weekly' ? '📅' : '📊' }}
                                 </div>

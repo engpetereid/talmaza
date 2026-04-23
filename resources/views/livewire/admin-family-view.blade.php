@@ -295,7 +295,7 @@
 
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                 @forelse($reports as $report)
-                    <a href="{{ route('report.view', $report->id) }}" wire:navigate
+                    <a href="{{ $report->type == 'weekly' ? route('report.weekly.view',$report->id) : route('report.monthly.view', $report->id) }}" wire:navigate
                         class="relative block p-5 transition-all bg-white border border-gray-100 shadow-sm group rounded-2xl hover:shadow-md hover:border-indigo-300">
 
                         <!-- Status Strip -->

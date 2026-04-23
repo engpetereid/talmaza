@@ -144,7 +144,7 @@
                         </div>
 
                         <!-- Clickable Content Area -->
-                        <a href="{{ route('report.view', $report->id) }}" wire:navigate
+                        <a  href="{{ $report->type == 'weekly' ? route('report.weekly.view',$report->id) : route('report.monthly.view', $report->id) }}" wire:navigate
                            class="block transition-opacity group-hover:opacity-80">
                             <h4 class="mb-1 text-xl font-bold text-gray-900 transition-colors group-hover:text-indigo-700">
                                 {{ $report->family->name ?? 'عائلة محذوفة' }}
@@ -172,7 +172,7 @@
                     </div>
 
                     <!-- Footer Link -->
-                    <a href="{{ route('report.view', $report->id) }}" wire:navigate
+                    <a  href="{{ $report->type == 'weekly' ? route('report.weekly.view',$report->id) : route('report.monthly.view', $report->id) }}" wire:navigate
                        class="block p-3 text-center transition-colors border-t border-gray-100 bg-gray-50 hover:bg-gray-100">
                         <span class="text-xs font-bold text-indigo-600 group-hover:underline">عرض التفاصيل والرد</span>
                     </a>
