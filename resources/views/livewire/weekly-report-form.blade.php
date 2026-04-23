@@ -52,8 +52,8 @@
                 </h3>
                 <div class="space-y-4">
                     @foreach($timeline as $index => $row)
-                        <div class="flex flex-col gap-3  border-2 border-gray-200 group bg-gray-50 rounded-2xl transition-colors {{ $isReadOnly ? 'border-indigo-100 bg-indigo-50/50 hover:border-indigo-200' : 'hover:border-indigo-300' }}">
-                            <div class="flex items-center gap-3">
+                        <div class="flex flex-col gap-1  border-2 border-gray-200 group bg-gray-50 rounded-2xl transition-colors {{ $isReadOnly ? 'border-indigo-100 bg-indigo-50/50 hover:border-indigo-200' : 'hover:border-indigo-300' }}">
+                            <div class="flex items-center gap-1">
                                 @if(!$isReadOnly)
                                     <input type="text" wire:model="timeline.{{ $index }}.time" placeholder="6-6:30" class="w-24 py-4 font-mono text-sm font-bold text-center border-2 border-gray-200 bg-white rounded-xl focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
                                     <input type="text" wire:model="timeline.{{ $index }}.activity" placeholder="اكتب النشاط هنا..." class="flex-grow py-4 text-base font-bold border-2 border-gray-200 bg-white rounded-xl focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
