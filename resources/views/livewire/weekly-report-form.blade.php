@@ -45,7 +45,7 @@
 
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
             <!-- Timeline (ترتيب لقاء التلمذة) -->
-            <div class="p-6 bg-white border border-gray-200 shadow-sm lg:col-span-2 rounded-3xl">
+            <div class="p-4 bg-white border border-gray-200 shadow-sm lg:col-span-2 rounded-3xl">
                 <h3 class="flex items-center gap-2 pb-3 mb-6 text-lg font-black text-gray-800 border-b border-gray-100">
                     <span class="p-2 text-indigo-600 bg-indigo-100 rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
                     ترتيب لقاء التلمذة
@@ -55,8 +55,8 @@
                         <div class="flex flex-col gap-3  border-2 border-gray-200 group bg-gray-50 rounded-2xl transition-colors {{ $isReadOnly ? 'border-indigo-100 bg-indigo-50/50 hover:border-indigo-200' : 'hover:border-indigo-300' }}">
                             <div class="flex items-center gap-3">
                                 @if(!$isReadOnly)
-                                    <input type="text" wire:model="timeline.{{ $index }}.time" placeholder="6-6:30" class="w-24 px-1 py-4 font-mono text-sm font-bold text-center border-2 border-gray-200 bg-white rounded-xl focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
-                                    <input type="text" wire:model="timeline.{{ $index }}.activity" placeholder="اكتب النشاط هنا..." class="flex-grow px-1 py-4 text-base font-bold border-2 border-gray-200 bg-white rounded-xl focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
+                                    <input type="text" wire:model="timeline.{{ $index }}.time" placeholder="6-6:30" class="w-24 py-4 font-mono text-sm font-bold text-center border-2 border-gray-200 bg-white rounded-xl focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
+                                    <input type="text" wire:model="timeline.{{ $index }}.activity" placeholder="اكتب النشاط هنا..." class="flex-grow py-4 text-base font-bold border-2 border-gray-200 bg-white rounded-xl focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
                                     <button wire:click="removeTimelineRow({{ $index }})" class="flex items-center justify-center w-12 h-12 text-gray-400 transition-colors bg-white border border-gray-200 rounded-xl hover:text-red-600 hover:bg-red-50 hover:border-red-200">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                                     </button>
