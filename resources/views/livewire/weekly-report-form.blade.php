@@ -52,11 +52,11 @@
                 </h3>
                 <div class="space-y-4">
                     @foreach($timeline as $index => $row)
-                        <div class="flex flex-col gap-3 p-5 border-2 border-gray-200 group bg-gray-50 rounded-2xl transition-colors {{ $isReadOnly ? 'border-indigo-100 bg-indigo-50/50 hover:border-indigo-200' : 'hover:border-indigo-300' }}">
+                        <div class="flex flex-col gap-3  border-2 border-gray-200 group bg-gray-50 rounded-2xl transition-colors {{ $isReadOnly ? 'border-indigo-100 bg-indigo-50/50 hover:border-indigo-200' : 'hover:border-indigo-300' }}">
                             <div class="flex items-center gap-3">
                                 @if(!$isReadOnly)
-                                    <input type="text" wire:model="timeline.{{ $index }}.time" placeholder="6-6:30" class="w-24 px-2 py-4 font-mono text-sm font-bold text-center border-2 border-gray-200 bg-white rounded-xl focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
-                                    <input type="text" wire:model="timeline.{{ $index }}.activity" placeholder="اكتب النشاط هنا..." class="flex-grow px-4 py-4 text-base font-bold border-2 border-gray-200 bg-white rounded-xl focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
+                                    <input type="text" wire:model="timeline.{{ $index }}.time" placeholder="6-6:30" class="w-24 px-1 py-4 font-mono text-sm font-bold text-center border-2 border-gray-200 bg-white rounded-xl focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
+                                    <input type="text" wire:model="timeline.{{ $index }}.activity" placeholder="اكتب النشاط هنا..." class="flex-grow px-1 py-4 text-base font-bold border-2 border-gray-200 bg-white rounded-xl focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
                                     <button wire:click="removeTimelineRow({{ $index }})" class="flex items-center justify-center w-12 h-12 text-gray-400 transition-colors bg-white border border-gray-200 rounded-xl hover:text-red-600 hover:bg-red-50 hover:border-red-200">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                                     </button>
@@ -299,13 +299,10 @@
         @if(!$isReadOnly)
             <div class="pt-6 pb-8">
                 <button wire:click="save" class="flex items-center justify-center w-full gap-3 py-5 text-xl font-black text-white transition-all transform shadow-xl bg-indigo-600 rounded-2xl shadow-indigo-200 hover:bg-indigo-700 hover:shadow-2xl active:scale-[0.98]">
-                    <span>حفظ وإرسال التقرير النهائي</span>
+                    <span>حفظ وإرسال التقرير</span>
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
                 </button>
             </div>
         @endif
     </div>
 </div>
-
-
-```

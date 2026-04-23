@@ -350,7 +350,7 @@
             <div class="pt-8 pb-8">
                 <button wire:click="save"
                         class="w-full bg-indigo-600 text-white py-5 rounded-2xl font-black shadow-xl shadow-indigo-200 hover:bg-indigo-700 hover:shadow-2xl transition-all transform active:scale-[0.98] text-xl flex items-center justify-center gap-3">
-                    <span>حفظ وإرسال التقرير النهائي</span>
+                    <span>حفظ وإرسال التقرير</span>
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
                 </button>
             </div>
