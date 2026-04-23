@@ -45,7 +45,7 @@
 
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
             <!-- Timeline (ترتيب لقاء التلمذة) -->
-            <div class="p-4 bg-white border border-gray-200 shadow-sm lg:col-span-2 rounded-3xl">
+            <div class="p-2 bg-white border border-gray-200 shadow-sm lg:col-span-2 rounded-3xl">
                 <h3 class="flex items-center gap-2 pb-3 mb-6 text-lg font-black text-gray-800 border-b border-gray-100">
                     <span class="p-2 text-indigo-600 bg-indigo-100 rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
                     ترتيب لقاء التلمذة
