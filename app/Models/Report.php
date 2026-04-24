@@ -39,6 +39,9 @@ class Report extends Model
 
         'admin_reply_at' => 'datetime',
         'visitation_hours' => 'decimal:2',
+        'visitation_replies' => 'array',
+        'session_replies' => 'array',
+        'stats_replies' => 'array',
     ];
 
     public function family()
