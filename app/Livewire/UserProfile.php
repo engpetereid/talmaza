@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use Livewire\Attributes\Layout;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -95,6 +96,23 @@ class UserProfile extends Component
         $this->reset('current_password', 'password', 'password_confirmation');
 
         session()->flash('password-status', 'تم تغيير كلمة المرور بنجاح 🔒');
+    }
+    /**
+     * فتح أسبوع جديد (خاص بالأدمن فقط)
+     */
+    public function openNewWeek()
+    {
+        // حماية إضافية في الـ Backend عشان لو حد حاول يتحايل على المتصفح
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'هذا الإجراء مخصص لمسئول النظام فقط.');
+        }
+
+        try {
+            Artisan::call('app:open-new-week');
+            session()->flash('week-status', 'تم فتح أسبوع خدمة جديد بنجاح ');
+        } catch (\Exception $e) {
+            session()->flash('week-error', 'حدث خطأ: ' . $e->getMessage());
+        }
     }
 
     /**

@@ -247,6 +247,50 @@
                     </form>
                 </div>
 
+                <!-- ==================================================== -->
+                <!-- 👑 كارت إدارة النظام (يظهر للأدمن فقط) -->
+                <!-- ==================================================== -->
+                @if(Auth::user()->role === 'admin')
+                    <div class="bg-gradient-to-br p-6 md:p-8 rounded-[2rem] shadow-xl border border-purple-700 ">
+                        <h3 class="flex items-center gap-3 mb-3 text-xl font-black ">
+                            <div class="p-2 rounded-xl ">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="m9 16 2 2 4-4"/>
+                                </svg>
+                            </div>
+                             أسابيع التتميم
+                        </h3>
+
+                        <p class="mb-6 text-sm font-bold leading-relaxed ">
+                            الضغط على هذا الزر سيقوم بتشغيل الأمر  لفتح أسبوع تتميم جديد لجميع العائلات في قاعدة البيانات.
+                        </p>
+
+                        <div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
+                            <!-- السحر كله في سطر: wire:confirm -->
+                            <button type="button"
+                                    wire:click="openNewWeek"
+                                    wire:confirm="تنبيه هام: هل أنت متأكد من فتح أسبوع خدمة جديد الآن؟ (هذا الإجراء سيُطبق فوراً على كل العائلات)"
+                                    class="flex items-center justify-center w-full gap-2 px-6 py-4 text-lg font-black text-purple-900 transition-all bg-amber-400 shadow-lg sm:w-auto rounded-2xl hover:bg-amber-300 active:scale-95">
+
+                                <span wire:loading.remove wire:target="openNewWeek"> فتح أسبوع جديد الآن</span>
+                                <span wire:loading wire:target="openNewWeek">جاري الإنشاء...</span>
+                            </button>
+
+                            @if (session()->has('week-status'))
+                                <span class="flex items-center justify-center w-full gap-2 px-4 py-3 text-sm font-bold text-green-200 bg-green-900/60 border border-green-500/30 sm:w-auto rounded-xl animate-fade-in-down">
+                                    {{ session('week-status') }}
+                                </span>
+                            @endif
+
+                            @if (session()->has('week-error'))
+                                <span class="flex items-center justify-center w-full gap-2 px-4 py-3 text-sm font-bold text-red-200 bg-red-900/60 border border-red-500/30 sm:w-auto rounded-xl">
+                                    {{ session('week-error') }}
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+                @endif
+
                 <!-- Desktop Logout Button -->
                 <button wire:click="logout"
                     class="items-center justify-center hidden w-full gap-3 py-5 text-xl font-black text-red-600 transition-colors border-2 border-red-100 shadow-sm lg:flex bg-red-50 rounded-2xl hover:bg-red-100">
