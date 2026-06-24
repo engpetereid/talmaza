@@ -251,7 +251,7 @@
                 <!-- 👑 كارت إدارة النظام (يظهر للأدمن فقط) -->
                 <!-- ==================================================== -->
                 @if(Auth::user()->role === 'admin')
-                    <div class="bg-gradient-to-br p-6 md:p-8 rounded-[2rem] shadow-xl border border-purple-700 ">
+                    <div class="bg-gradient-to-br p-6 md:p-8 rounded-[2rem] shadow-xl border  ">
                         <h3 class="flex items-center gap-3 mb-3 text-xl font-black ">
                             <div class="p-2 rounded-xl ">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -266,11 +266,10 @@
                         </p>
 
                         <div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
-                            <!-- السحر كله في سطر: wire:confirm -->
                             <button type="button"
                                     wire:click="openNewWeek"
                                     wire:confirm="تنبيه هام: هل أنت متأكد من فتح أسبوع خدمة جديد الآن؟ (هذا الإجراء سيُطبق فوراً على كل العائلات)"
-                                    class="flex items-center justify-center w-full gap-2 px-6 py-4 text-lg font-black text-purple-900 transition-all bg-amber-400 shadow-lg sm:w-auto rounded-2xl hover:bg-amber-300 active:scale-95">
+                                    class="flex items-center justify-center w-full gap-2 px-6 py-4 text-lg font-black text-white transition-all bg-indigo-600 shadow-lg sm:w-auto rounded-2xl  active:scale-95">
 
                                 <span wire:loading.remove wire:target="openNewWeek"> فتح أسبوع جديد الآن</span>
                                 <span wire:loading wire:target="openNewWeek">جاري الإنشاء...</span>
