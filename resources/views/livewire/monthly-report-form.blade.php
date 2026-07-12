@@ -15,11 +15,7 @@
 
                 @if($isReadOnly)
                     <div class="flex gap-3">
-                        <button wire:click="saveReplies" wire:loading.attr="disabled" class="flex items-center gap-2 px-6 py-3 font-bold text-white transition-transform bg-green-600 shadow-lg hover:bg-green-700 rounded-xl shadow-green-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
-                            <span wire:loading.remove wire:target="saveReplies">حفظ الردود</span>
-                            <span wire:loading wire:target="saveReplies">جاري الحفظ...</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-                        </button>
+
                         @if(Auth::user()->role == 'admin')
                             <button wire:click="closeReplies" class="flex items-center gap-2 px-6 py-3 font-bold text-white transition-transform bg-blue-600 shadow-lg hover:bg-blue-700 rounded-xl shadow-blue-50 active:scale-95">
                                 <span wire:loading.remove wire:target="closeReplies">إغلاق التقرير</span>
@@ -90,26 +86,44 @@
                     </div>
 
                     <!-- Detailed Table -->
-                    <div class="overflow-x-auto border bg-black/20 rounded-2xl border-white/10 backdrop-blur-sm custom-scrollbar mb-6">
-                        <table class="w-full text-sm text-center">
-                            <thead class="text-xs uppercase bg-black/30 text-white/80 font-bold tracking-wider">
+                    <div class="overflow-auto max-h-[500px] border bg-black/20 rounded-2xl border-white/10 custom-scrollbar mb-6 relative">
+                        <!-- 1. ضفنا هنا border-separate border-spacing-0 -->
+                        <table class="w-full text-sm text-center border-separate border-spacing-0">
+                            <thead class="text-xs uppercase text-white/80 font-bold tracking-wider">
                             <tr>
-                                <th class="p-4 text-right min-w-[140px]">الاسم</th>
-                                <th class="p-4 min-w-[70px]">حضور</th><th class="p-4 min-w-[70px]">نوتة</th><th class="p-4 min-w-[70px]">قداس</th>
-                                <th class="p-4 min-w-[70px]">عشية</th><th class="p-4 min-w-[70px]">تسبحة</th><th class="p-4 min-w-[90px]">مشاركة خلوة</th>
-                                <th class="p-4 min-w-[70px]">قراءة</th><th class="p-4 min-w-[90px]">اجتماع خدام</th><th class="p-4 min-w-[90px]">تلمذة</th>
-                                <th class="p-4 min-w-[80px]">مذبح</th><th class="p-4 min-w-[90px]">خلوة اسبوعية</th><th class="p-4 min-w-[70px]">العظة</th>
+                                <!-- 2. حطينا sticky top-0 z-20 و لون خلفية صلب bg-indigo-950 على كل th -->
+                                <th class="sticky top-0 z-20 p-4 text-right min-w-[140px] bg-indigo-950 border-b border-white/10 shadow-sm">الاسم</th>
+                                <th class="sticky top-0 z-20 p-4 min-w-[70px] bg-indigo-950 border-b border-white/10 shadow-sm">حضور</th>
+                                <th class="sticky top-0 z-20 p-4 min-w-[70px] bg-indigo-950 border-b border-white/10 shadow-sm">نوتة</th>
+                                <th class="sticky top-0 z-20 p-4 min-w-[70px] bg-indigo-950 border-b border-white/10 shadow-sm">قداس</th>
+                                <th class="sticky top-0 z-20 p-4 min-w-[70px] bg-indigo-950 border-b border-white/10 shadow-sm">عشية</th>
+                                <th class="sticky top-0 z-20 p-4 min-w-[70px] bg-indigo-950 border-b border-white/10 shadow-sm">تسبحة</th>
+                                <th class="sticky top-0 z-20 p-4 min-w-[90px] bg-indigo-950 border-b border-white/10 shadow-sm">مشاركة خلوة</th>
+                                <th class="sticky top-0 z-20 p-4 min-w-[70px] bg-indigo-950 border-b border-white/10 shadow-sm">قراءة</th>
+                                <th class="sticky top-0 z-20 p-4 min-w-[90px] bg-indigo-950 border-b border-white/10 shadow-sm">اجتماع خدام</th>
+                                <th class="sticky top-0 z-20 p-4 min-w-[90px] bg-indigo-950 border-b border-white/10 shadow-sm">تلمذة</th>
+                                <th class="sticky top-0 z-20 p-4 min-w-[80px] bg-indigo-950 border-b border-white/10 shadow-sm">مذبح</th>
+                                <th class="sticky top-0 z-20 p-4 min-w-[90px] bg-indigo-950 border-b border-white/10 shadow-sm">خلوة اسبوعية</th>
+                                <th class="sticky top-0 z-20 p-4 min-w-[70px] bg-indigo-950 border-b border-white/10 shadow-sm">العظة</th>
                             </tr>
                             </thead>
-                            <tbody class="divide-y divide-white/10 text-white font-bold">
+                            <tbody class="text-white font-bold">
                             @foreach($members_monthly_stats as $stat)
-                               <tr class="hover:bg-white/10 transition-colors {{ !$stat['is_active'] ? 'opacity-50 bg-black/20' : '' }}">
-                                    <td class="p-4 text-right whitespace-nowrap">{{ $stat['name'] }}</td>
-                                    <td class="p-4">{{ $stat['attendance'] }}%</td><td class="p-4">{{ $stat['note_score'] }}%</td>
-                                    <td class="p-4">{{ $stat['mass'] ?? 0 }}%</td><td class="p-4">{{ $stat['vespers'] ?? 0 }}%</td><td class="p-4">{{ $stat['tasbeha'] ?? 0 }}%</td>
-                                    <td class="p-4">{{ $stat['kholwa_count'] }}%</td><td class="p-4">{{ $stat['reading'] ?? 0 }}%</td><td class="p-4">{{ $stat['servants'] ?? 0 }}%</td>
-                                    <td class="p-4 text-yellow-300">{{ $stat['talmaza_training_count'] }}%</td><td class="p-4">{{ $stat['altar'] ?? 0}}%</td>
-                                    <td class="p-4">{{ $stat['weekly_kholwa'] ?? 0 }}%</td><td class="p-4">{{ $stat['sermon'] ?? 0 }}%</td>
+                                <tr class="hover:bg-white/10 transition-colors {{ !$stat['is_active'] ? 'opacity-50 bg-black/20' : '' }}">
+                                    <!-- ضفنا border-b علشان الجدول يفضل شكله مقسم بعد ما شلنا divide-y -->
+                                    <td class="p-4 text-right whitespace-nowrap border-b border-white/5">{{ $stat['name'] }}</td>
+                                    <td class="p-4 border-b border-white/5">{{ $stat['attendance'] }}%</td>
+                                    <td class="p-4 border-b border-white/5">{{ $stat['note_score'] }}%</td>
+                                    <td class="p-4 border-b border-white/5">{{ $stat['mass'] ?? 0 }}%</td>
+                                    <td class="p-4 border-b border-white/5">{{ $stat['vespers'] ?? 0 }}%</td>
+                                    <td class="p-4 border-b border-white/5">{{ $stat['tasbeha'] ?? 0 }}%</td>
+                                    <td class="p-4 border-b border-white/5">{{ $stat['kholwa_count'] }}%</td>
+                                    <td class="p-4 border-b border-white/5">{{ $stat['reading'] ?? 0 }}%</td>
+                                    <td class="p-4 border-b border-white/5">{{ $stat['servants'] ?? 0 }}%</td>
+                                    <td class="p-4 text-yellow-300 border-b border-white/5">{{ $stat['talmaza_training_count'] }}%</td>
+                                    <td class="p-4 border-b border-white/5">{{ $stat['altar'] ?? 0}}%</td>
+                                    <td class="p-4 border-b border-white/5">{{ $stat['weekly_kholwa'] ?? 0 }}%</td>
+                                    <td class="p-4 border-b border-white/5">{{ $stat['sermon'] ?? 0 }}%</td>
                                 </tr>
                             @endforeach
                             </tbody>
@@ -344,6 +358,9 @@
                     إضافة رسالة جديدة
                 </button>
             @endif
+
+
+
         </div>
 
         @if(!$isReadOnly)
@@ -355,8 +372,14 @@
                 </button>
             </div>
         @endif
+            @if(Auth::user()->role == 'admin')
+            <button wire:click="saveReplies" wire:loading.attr="disabled" class="flex items-center gap-2 px-6 py-3 font-bold text-white transition-transform bg-green-600 shadow-lg hover:bg-green-700 rounded-xl shadow-green-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                <span wire:loading.remove wire:target="saveReplies">حفظ الردود</span>
+                <span wire:loading wire:target="saveReplies">جاري الحفظ...</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            </button>
+            @endif
     </div>
 </div>
 
 
-`

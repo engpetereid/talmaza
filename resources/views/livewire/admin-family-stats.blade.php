@@ -7,7 +7,7 @@
             <div>
                 <h1 class="text-lg font-bold text-gray-800">تقرير: {{ $family->name }} 📊</h1>
                 <p class="text-xs text-gray-400">القائد:
-                    {{ $family->users()->where('role', 'leader')->first()->name ?? '-' }}
+                    {{ $family->user()->where('role', 'leader')->first()->name ?? '-' }}
                 </p>
             </div>
             <a href="{{ route('admin.family.view', $family->id) }}" wire:navigate

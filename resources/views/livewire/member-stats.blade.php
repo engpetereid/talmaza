@@ -9,31 +9,31 @@
 
             <!-- Header (Navigation) -->
             <div class="flex items-center justify-between mb-10">
-                <a href="{{ url()->previous() }}" wire:navigate
-                    class="flex items-center gap-2 px-5 py-3 text-base font-bold transition-colors border rounded-2xl bg-white/10 hover:bg-white/20 backdrop-blur-md border-white/10">
+                <button type="button" onclick="history.back()"
+                        class="flex items-center gap-2 px-5 py-3 text-base font-bold transition-colors border rounded-2xl bg-white/10 hover:bg-white/20 backdrop-blur-md border-white/10">
                     <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                         stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <path d="m15 18-6-6 6-6" />
                     </svg>
                     <span>رجوع</span>
-                </a>
+                </button>
 
                 <h1 class="hidden text-xl font-bold opacity-90 md:block">
                     {{ $isEditing ? 'تعديل البيانات' : 'الملف الشخصي' }}
                 </h1>
 
                 <button wire:click="toggleEdit"
-                    class="flex items-center gap-2 px-5 py-3 text-base font-bold transition-colors border rounded-2xl bg-white/10 hover:bg-white/20 backdrop-blur-md border-white/10">
+                        class="flex items-center gap-2 px-5 py-3 text-base font-bold transition-colors border rounded-2xl bg-white/10 hover:bg-white/20 backdrop-blur-md border-white/10">
                     <span>{{ $isEditing ? 'إلغاء' : 'تعديل' }}</span>
                     @if($isEditing)
                         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2.5">
+                             stroke="currentColor" stroke-width="2.5">
                             <path d="M18 6 6 18" />
                             <path d="m6 6 12 12" />
                         </svg>
                     @else
                         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2.5">
+                             stroke="currentColor" stroke-width="2.5">
                             <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
                             <path d="m15 5 4 4" />
                         </svg>
@@ -45,7 +45,7 @@
                 <div
                     class="flex items-center justify-center max-w-2xl gap-2 p-4 mx-auto mb-8 text-lg font-bold text-center text-white shadow-lg bg-green-500/90 rounded-2xl">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="3">
+                         stroke="currentColor" stroke-width="3">
                         <polyline points="20 6 9 17 4 12" />
                     </svg>
                     {{ session('message') }}
@@ -60,25 +60,20 @@
                     <div
                         class="relative flex items-center justify-center flex-shrink-0 w-32 h-32 mb-3 overflow-hidden text-5xl font-black text-indigo-700 bg-white border-4 border-indigo-300 rounded-full shadow-2xl md:w-40 md:h-40 md:text-6xl group">
 
-                        <!-- إظهار الصورة إذا تم اختيارها الآن (مؤقتة) -->
                         @if ($photo)
                             <img src="{{ $photo->temporaryUrl() }}" class="object-cover w-full h-full">
-                            <!-- إظهار الصورة المحفوظة في قاعدة البيانات -->
                         @elseif ($member->photo_path)
                             <img src="{{ asset('storage/' . $member->photo_path) }}" class="object-cover w-full h-full">
-                            <!-- الحرف الأول إذا لم توجد صورة -->
                         @else
                             {{ mb_substr($member->name, 0, 1) }}
                         @endif
-
-                        <!-- طبقة التعديل (تظهر فقط في وضع التعديل) -->
 
                         @if($isEditing)
                             <label
                                 class="absolute inset-0 flex flex-col items-center justify-center text-white transition-opacity opacity-0 cursor-pointer bg-black/60 group-hover:opacity-100">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                                    stroke-linejoin="round">
+                                     fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                     stroke-linejoin="round">
                                     <path
                                         d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
                                     <circle cx="12" cy="13" r="4" />
@@ -89,17 +84,13 @@
                         @endif
                     </div>
 
-                    <!-- رسالة تحميل الصورة (Livewire) -->
                     <div wire:loading wire:target="photo" class="mb-3 text-xs font-bold text-indigo-200 animate-pulse">
                         جاري رفع الصورة...</div>
-
-                    <!-- رسالة خطأ الصورة -->
                     @error('photo') <span class="mb-3 text-xs font-bold text-red-300">{{ $message }}</span> @enderror
 
-                    <!-- زر حذف الصورة -->
                     @if($isEditing && $member->photo_path)
                         <button wire:click="deletePhoto" wire:confirm="هل أنت متأكد من حذف الصورة؟"
-                            class="px-4 py-1.5 text-xs font-bold text-red-200 transition-colors bg-white/10 rounded-full hover:bg-red-500 hover:text-white mb-6 md:mb-0">
+                                class="px-4 py-1.5 text-xs font-bold text-red-200 transition-colors bg-white/10 rounded-full hover:bg-red-500 hover:text-white mb-6 md:mb-0">
                             حذف الصورة 🗑️
                         </button>
                     @endif
@@ -108,50 +99,65 @@
                 <!-- Info Section -->
                 <div class="flex-grow w-full text-center md:text-right">
                     @if($isEditing)
-                        <div
-                            class="grid grid-cols-1 gap-6 p-8 border shadow-inner md:grid-cols-2 bg-indigo-800/50 rounded-3xl backdrop-blur-md border-indigo-400/30">
+                        <div class="grid grid-cols-1 gap-4 p-6 border shadow-inner md:grid-cols-2 lg:grid-cols-3 bg-indigo-800/50 rounded-3xl backdrop-blur-md border-indigo-400/30">
+                            <!-- الأساسيات -->
                             <div class="space-y-2">
                                 <label class="block text-sm font-bold text-right text-indigo-200">الاسم</label>
-                                <input type="text" wire:model="name"
-                                    class="w-full p-4 text-lg font-bold text-indigo-900 bg-white border-0 shadow-sm rounded-xl focus:ring-4 focus:ring-indigo-400"
-                                    placeholder="الاسم رباعي">
+                                <input type="text" wire:model="name" class="w-full p-4 text-base font-bold text-indigo-900 bg-white border-0 shadow-sm rounded-xl focus:ring-4 focus:ring-indigo-400" placeholder="الاسم رباعي">
                             </div>
                             <div class="space-y-2">
                                 <label class="block text-sm font-bold text-right text-indigo-200">رقم الموبايل</label>
-                                <input type="tel" wire:model="phone"
-                                    class="w-full p-4 text-lg font-bold text-right text-indigo-900 bg-white border-0 shadow-sm rounded-xl focus:ring-4 focus:ring-indigo-400"
-                                    placeholder="01xxxxxxxxx">
+                                <input type="tel" wire:model="phone" class="w-full p-4 text-base font-bold text-right text-indigo-900 bg-white border-0 shadow-sm rounded-xl focus:ring-4 focus:ring-indigo-400 dir-ltr" placeholder="01xxxxxxxxx">
                             </div>
                             <div class="space-y-2">
                                 <label class="block text-sm font-bold text-right text-indigo-200">تاريخ الميلاد</label>
-                                <input type="date" wire:model="birth_date"
-                                    class="w-full p-4 text-lg font-bold text-indigo-900 bg-white border-0 shadow-sm rounded-xl focus:ring-4 focus:ring-indigo-400">
+                                <input type="date" wire:model="birth_date" class="w-full p-4 text-base font-bold text-indigo-900 bg-white border-0 shadow-sm rounded-xl focus:ring-4 focus:ring-indigo-400">
+                            </div>
+
+                            <!-- بيانات التواصل والعمل -->
+                            <div class="space-y-2">
+                                <label class="block text-sm font-bold text-right text-indigo-200">العنوان</label>
+                                <input type="text" wire:model="address" class="w-full p-4 text-base font-bold text-indigo-900 bg-white border-0 shadow-sm rounded-xl focus:ring-4 focus:ring-indigo-400" placeholder="اسم الشارع أو المنطقة">
                             </div>
                             <div class="space-y-2">
                                 <label class="block text-sm font-bold text-right text-indigo-200">الكلية / العمل</label>
-                                <input type="text" wire:model="job_or_college"
-                                    class="w-full p-4 text-lg font-bold text-indigo-900 bg-white border-0 shadow-sm rounded-xl focus:ring-4 focus:ring-indigo-400"
-                                  placeholder="العمل أو الدراسة">
+                                <input type="text" wire:model="job_or_college" class="w-full p-4 text-base font-bold text-indigo-900 bg-white border-0 shadow-sm rounded-xl focus:ring-4 focus:ring-indigo-400" placeholder="العمل أو الدراسة">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="block text-sm font-bold text-right text-indigo-200">اسم الزوج / الزوجة</label>
+                                <input type="text" wire:model="spouse_name" class="w-full p-4 text-base font-bold text-indigo-900 bg-white border-0 shadow-sm rounded-xl focus:ring-4 focus:ring-indigo-400" placeholder="إن وجد">
+                            </div>
+
+                            <!-- البيانات الكنسية -->
+                            <div class="space-y-2">
+                                <label class="block text-sm font-bold text-right text-indigo-200">الكنيسة التابع لها</label>
+                                <input type="text" wire:model="church_name" class="w-full p-4 text-base font-bold text-indigo-900 bg-white border-0 shadow-sm rounded-xl focus:ring-4 focus:ring-indigo-400" placeholder="اسم الكنيسة">
                             </div>
                             <div class="space-y-2">
                                 <label class="block text-sm font-bold text-right text-indigo-200">أب الاعتراف</label>
-                                <input type="text" wire:model="confession_father"
-                                    class="w-full p-4 text-lg font-bold text-indigo-900 bg-white border-0 shadow-sm rounded-xl focus:ring-4 focus:ring-indigo-400"
-                                    placeholder="اسم أب الاعتراف">
+                                <input type="text" wire:model="confession_father" class="w-full p-4 text-base font-bold text-indigo-900 bg-white border-0 shadow-sm rounded-xl focus:ring-4 focus:ring-indigo-400" placeholder="اسم أب الاعتراف">
                             </div>
                             <div class="space-y-2">
-                                <label class="block text-sm font-bold text-right text-indigo-200">المواهب</label>
-                                <input type="text" wire:model="talents"
-                                    class="w-full p-4 text-lg font-bold text-indigo-900 bg-white border-0 shadow-sm rounded-xl focus:ring-4 focus:ring-indigo-400"
-                                    placeholder="رسم، ترانيم، ...">
+                                <label class="block text-sm font-bold text-right text-indigo-200">اسم الخدمة (للخدام)</label>
+                                <input type="text" wire:model="service_name" class="w-full p-4 text-base font-bold text-indigo-900 bg-white border-0 shadow-sm rounded-xl focus:ring-4 focus:ring-indigo-400" placeholder="إن وجد">
                             </div>
+
+                            <div class="space-y-2 md:col-span-2 lg:col-span-3">
+                                <label class="block text-sm font-bold text-right text-indigo-200">أسماء الأبناء والمراحل التعليمية</label>
+                                <textarea wire:model="children_details" rows="2" class="w-full p-4 text-base font-bold text-indigo-900 bg-white border-0 shadow-sm rounded-xl focus:ring-4 focus:ring-indigo-400" placeholder="مثال: يوسف (إعدادي)، مريم (ابتدائي)..."></textarea>
+                            </div>
+                            <div class="space-y-2 md:col-span-2 lg:col-span-3">
+                                <label class="block text-sm font-bold text-right text-indigo-200">المواهب</label>
+                                <input type="text" wire:model="talents" class="w-full p-4 text-base font-bold text-indigo-900 bg-white border-0 shadow-sm rounded-xl focus:ring-4 focus:ring-indigo-400" placeholder="رسم، ترانيم، ...">
+                            </div>
+
                             <button wire:click="saveProfile"
-                                class="flex items-center justify-center col-span-1 gap-2 py-4 mt-4 text-xl font-black text-white transition-all transform bg-green-500 shadow-lg md:col-span-2 hover:bg-green-600 rounded-xl active:scale-95">
+                                    class="flex items-center justify-center col-span-1 gap-2 py-4 mt-2 text-xl font-black text-white transition-all transform bg-green-500 shadow-lg md:col-span-2 lg:col-span-3 hover:bg-green-600 rounded-xl active:scale-95">
                                 <span wire:loading.remove wire:target="saveProfile">حفظ التعديلات</span>
                                 <span wire:loading wire:target="saveProfile">جاري الحفظ...</span>
                                 <svg wire:loading.remove wire:target="saveProfile" xmlns="http://www.w3.org/2000/svg"
-                                    width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="3">
+                                     width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="3">
                                     <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
                                     <circle cx="12" cy="7" r="4" />
                                 </svg>
@@ -164,22 +170,21 @@
                         <div class="flex flex-wrap items-center justify-center gap-4 mb-6 md:justify-start">
                             @if($member->phone)
                                 <a href="tel:{{ $member->phone }}"
-                                    class="flex items-center gap-2 bg-white/20 hover:bg-white/30 px-5 py-2.5 rounded-full text-base font-bold backdrop-blur-sm transition-colors border border-white/10">
+                                   class="flex items-center gap-2 bg-white/20 hover:bg-white/30 px-5 py-2.5 rounded-full text-base font-bold backdrop-blur-sm transition-colors border border-white/10">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                                        fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                                        stroke-linejoin="round">
+                                         fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                         stroke-linejoin="round">
                                         <path
                                             d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
                                     </svg>
-                                    {{ $member->phone }}
+                                    <span dir="ltr">{{ $member->phone }}</span>
                                 </a>
                                 <a href="https://wa.me/+20{{ ltrim($member->phone, '0') }}" target="_blank"
-                                    class="flex items-center justify-center transition-colors bg-green-500 rounded-full shadow-lg w-11 h-11 hover:bg-green-600"
-                                    title="Whatsapp">
+                                   class="flex items-center justify-center transition-colors bg-green-500 rounded-full shadow-lg w-11 h-11 hover:bg-green-600"
+                                   title="Whatsapp">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                        fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                                        stroke-linejoin="round" class="text-white">
-
+                                         fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                         stroke-linejoin="round" class="text-white">
                                         <path
                                             d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
                                     </svg>
@@ -191,42 +196,57 @@
                             </span>
                         </div>
 
-                        <div
-                            class="grid max-w-3xl grid-cols-1 mx-auto text-base font-medium text-indigo-100 md:grid-cols-2 gap-y-3 gap-x-8 md:mx-0">
+                        <!-- شبكة البيانات -->
+                        <div class="grid max-w-4xl grid-cols-1 mx-auto text-base font-medium text-indigo-100 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 md:mx-0">
+                            @if($member->birth_date)
+                                <div class="flex items-center justify-center gap-3 p-2 transition-colors rounded-lg md:justify-start hover:bg-white/5">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
+                                    {{ $member->birth_date->format('d F Y') }} ({{ $member->birth_date->age }} سنة)
+                                </div>
+                            @endif
+                            @if($member->address)
+                                <div class="flex items-center justify-center gap-3 p-2 transition-colors rounded-lg md:justify-start hover:bg-white/5">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                                    {{ $member->address }}
+                                </div>
+                            @endif
                             @if($member->job_or_college)
-                                <div
-                                    class="flex items-center justify-center gap-3 p-2 transition-colors rounded-lg md:justify-start hover:bg-white/5">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                                        fill="none" stroke="currentColor" stroke-width="2.5">
-                                        <path d="M22 10v6M2 10v6" />
-                                        <path
-                                            d="M20 21a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3zm2-5a2 2 0 0 0-2-2h-2V8a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v4H4a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2z" />
-                                    </svg>
+                                <div class="flex items-center justify-center gap-3 p-2 transition-colors rounded-lg md:justify-start hover:bg-white/5">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 10v6M2 10v6" /><path d="M20 21a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3zm2-5a2 2 0 0 0-2-2h-2V8a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v4H4a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2z" /></svg>
                                     {{ $member->job_or_college }}
                                 </div>
                             @endif
+                            @if($member->spouse_name)
+                                <div class="flex items-center justify-center gap-3 p-2 transition-colors rounded-lg md:justify-start hover:bg-white/5">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.77.78-.77-.78a5.4 5.4 0 0 0-7.65 0C1.46 6.7 1.33 10.28 4 13l8 8 8-8c2.67-2.72 2.54-6.3.42-8.42z"/></svg>
+                                    <span class="font-bold text-indigo-300">متزوج من:</span> {{ $member->spouse_name }}
+                                </div>
+                            @endif
+                            @if($member->church_name)
+                                <div class="flex items-center justify-center gap-3 p-2 transition-colors rounded-lg md:justify-start hover:bg-white/5">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m18 10 4 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-8l4-2"/><path d="M14 18v-4a2 2 0 0 0-4 0v4"/><path d="M12 16V2"/><path d="M9 5h6"/></svg>
+                                    {{ $member->church_name }}
+                                </div>
+                            @endif
+                            @if($member->service_name)
+                                <div class="flex items-center justify-center gap-3 p-2 transition-colors rounded-lg md:justify-start hover:bg-white/5">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                                    {{ $member->service_name }}
+                                </div>
+                            @endif
                             @if($member->confession_father)
-                                <div
-                                    class="flex items-center justify-center gap-3 p-2 transition-colors rounded-lg md:justify-start hover:bg-white/5">
+                                <div class="flex items-center justify-center gap-3 p-2 transition-colors rounded-lg md:justify-start hover:bg-white/5">
                                     <span class="font-bold text-indigo-300">أب الاعتراف:</span> {{ $member->confession_father }}
                                 </div>
                             @endif
-                            @if($member->birth_date)
-                                <div
-                                    class="flex items-center justify-center gap-3 p-2 transition-colors rounded-lg md:justify-start hover:bg-white/5">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                                        fill="none" stroke="currentColor" stroke-width="2.5">
-                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                                        <line x1="16" y1="2" x2="16" y2="6" />
-                                        <line x1="8" y1="2" x2="8" y2="6" />
-                                        <line x1="3" y1="10" x2="21" y2="10" />
-                                    </svg>
-                                    {{ $member->birth_date->format('d F') }} ({{ $member->birth_date->age }} سنة)
+                            @if($member->children_details)
+                                <div class="flex items-start justify-center col-span-1 gap-3 p-2 transition-colors rounded-lg md:col-span-2 lg:col-span-3 md:justify-start hover:bg-white/5">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="mt-1 shrink-0"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                                    <div><span class="font-bold text-indigo-300">الأبناء:</span> {{ $member->children_details }}</div>
                                 </div>
                             @endif
                             @if($member->talents)
-                                <div
-                                    class="flex items-center justify-center col-span-1 gap-3 p-2 transition-colors rounded-lg md:col-span-2 md:justify-start hover:bg-white/5">
+                                <div class="flex items-start justify-center col-span-1 gap-3 p-2 transition-colors rounded-lg md:col-span-2 lg:col-span-3 md:justify-start hover:bg-white/5">
                                     <span class="font-bold text-indigo-300">المواهب:</span> {{ $member->talents }}
                                 </div>
                             @endif
@@ -236,7 +256,6 @@
             </div>
         </div>
     </div>
-
     <!-- 2. Analytics Content -->
     <div class="relative z-10 px-4 mx-auto -mt-20 space-y-10 max-w-7xl sm:px-6 lg:px-8">
 

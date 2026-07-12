@@ -95,7 +95,7 @@ class AdminReportsReview extends Component
                 ->toArray();
 
             // جلب العائلات التي غير موجودة في القائمة السابقة
-            $missingFamilies = Family::with(['users' => function ($q) {
+            $missingFamilies = Family::with(['user' => function ($q) {
                 $q->where('role', 'leader');
             }])->whereNotIn('id', $submittedFamilyIds)->get();
         }

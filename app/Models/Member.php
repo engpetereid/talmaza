@@ -18,7 +18,12 @@ class Member extends Model
         'job_or_college',
         'confession_father',
         'talents',
-        'photo_path'
+        'photo_path',
+        'address',
+        'spouse_name',
+        'children_details',
+        'church_name',
+        'service_name'
     ];
 
     protected $casts = [

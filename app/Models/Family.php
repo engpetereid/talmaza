@@ -7,14 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class Family extends Model
 {
-    use HasFactory;
 
     protected $fillable = ['name'];
 
 
-    public function users()
+    public function user()
     {
-        return $this->hasMany(User::class);
+        return $this->hasOne(User::class);
     }
 
 
@@ -23,7 +22,7 @@ class Family extends Model
         return $this->hasMany(Member::class);
     }
 
-  
+
     public function weeklyMeetings()
     {
         return $this->hasMany(WeeklyMeeting::class);

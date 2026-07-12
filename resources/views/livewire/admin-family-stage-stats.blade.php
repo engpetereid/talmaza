@@ -8,7 +8,7 @@
             <div>
                 <h1 class="text-lg font-bold text-gray-800">تقارير المراحل: {{ $family->name }} 📊</h1>
                 <p class="text-xs text-gray-400">القائد:
-                    {{ $family->users()->where('role', 'leader')->first()->name ?? '-' }}</p>
+                    {{ $family->user()->where('role', 'leader')->first()->name ?? '-' }}</p>
             </div>
             <a href="{{ route('admin.family.view', $family->id) }}" wire:navigate
                 class="px-3 py-1 text-xs font-bold text-gray-600 transition-colors bg-gray-100 rounded-lg hover:bg-gray-200">رجوع

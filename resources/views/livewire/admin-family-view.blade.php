@@ -20,7 +20,7 @@
                             <span class="text-sm font-bold text-gray-500 md:text-base">خادم العائلة:</span>
                             <span
                                 class="bg-indigo-50 text-indigo-700 px-3 py-0.5 rounded-lg text-sm font-bold border border-indigo-100">
-                                {{ $family->users()->where('role', 'leader')->first()->name ?? 'غير محدد' }}
+                                {{ $family->user()->where('role', 'leader')->first()->name ?? 'غير محدد' }}
                             </span>
                         </div>
                     </div>

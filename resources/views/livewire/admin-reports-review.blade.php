@@ -148,7 +148,12 @@
                            class="block transition-opacity group-hover:opacity-80">
                             <h4 class="mb-1 text-xl font-bold text-gray-900 transition-colors group-hover:text-indigo-700">
                                 {{ $report->family->name ?? 'عائلة محذوفة' }}
+
                             </h4>
+                            <h3 class="font-bold ">
+                                القائد
+                                {{ $report->family->user->name }}
+                            </h3>
 
                             <p class="mb-4 text-sm font-medium text-gray-500">
                                 {{ $report->type == 'weekly' ? 'تقرير أسبوعي' : 'تقرير شهري' }}
@@ -222,7 +227,7 @@
                                 <h4 class="text-lg font-bold text-gray-900">{{ $missingFamily->name }}</h4>
                                 <p class="flex items-center gap-1 mt-1 text-sm font-medium text-gray-500">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                                    القائد: {{ $missingFamily->users->first()->name ?? 'غير محدد' }}
+                                    القائد: {{ $missingFamily->user->first()->name ?? 'غير محدد' }}
                                 </p>
                             </div>
 

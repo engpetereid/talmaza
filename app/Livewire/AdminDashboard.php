@@ -30,7 +30,7 @@ class AdminDashboard extends Component
         ];
 
         //  قائمة العائلات (مع البحث)
-        $familiesQuery = Family::with(['users', 'members'])
+        $familiesQuery = Family::with(['user', 'members'])
             ->with(['weeklyMeetings' => function ($query) {
                 $query->where('status', 'completed')->latest('week_date');
             }])
@@ -39,7 +39,7 @@ class AdminDashboard extends Component
         // لو فيه بحث، نفلتر بالاسم أو اسم القائد
         if (!empty($this->search)) {
             $familiesQuery->where('name', 'like', '%' . $this->search . '%')
-                ->orWhereHas('users', function ($q) {
+                ->orWhereHas('user', function ($q) {
                     $q->where('role', 'leader')->where('name', 'like', '%' . $this->search . '%');
                 });
         }
@@ -56,7 +56,7 @@ class AdminDashboard extends Component
             return [
                 'id' => $family->id,
                 'name' => $family->name,
-                'leader_name' => $family->users->where('role', 'leader')->first()->name ?? 'بدون قائد',
+                'leader_name' => $family->user->where('role', 'leader')->first()->name ?? 'بدون قائد',
                 'members_count' => $family->members_count,
                 'last_lesson' => $lastLessonTitle,
                 'last_meeting_date' => $lastMeeting

@@ -27,6 +27,13 @@ class MemberStats extends Component
     public $talents;
     public $photo;
 
+    // الحقول الجديدة
+    public $address;
+    public $spouse_name;
+    public $children_details;
+    public $church_name;
+    public $service_name;
+
     public $period = 12;
 
     public function mount(Member $member)
@@ -43,6 +50,13 @@ class MemberStats extends Component
         $this->job_or_college = $member->job_or_college;
         $this->confession_father = $member->confession_father;
         $this->talents = $member->talents;
+
+        // ربط الحقول الجديدة
+        $this->address = $member->address;
+        $this->spouse_name = $member->spouse_name;
+        $this->children_details = $member->children_details;
+        $this->church_name = $member->church_name;
+        $this->service_name = $member->service_name;
     }
 
     public function setPeriod($weeks)
@@ -78,6 +92,13 @@ class MemberStats extends Component
             'confession_father' => 'nullable|string|max:255',
             'talents' => 'nullable|string|max:500',
             'photo' => 'nullable|image|max:5120',
+
+            // تحقق الحقول الجديدة
+            'address' => 'nullable|string|max:255',
+            'spouse_name' => 'nullable|string|max:255',
+            'children_details' => 'nullable|string|max:1000',
+            'church_name' => 'nullable|string|max:255',
+            'service_name' => 'nullable|string|max:255',
         ], [
             'photo.image' => 'يجب أن يكون الملف المرفق صورة.',
             'photo.max' => 'حجم الصورة يجب ألا يتجاوز 5 ميجا.',
@@ -90,6 +111,13 @@ class MemberStats extends Component
             'job_or_college' => $this->job_or_college,
             'confession_father' => $this->confession_father,
             'talents' => $this->talents,
+
+            // الحقول الجديدة
+            'address' => $this->address,
+            'spouse_name' => $this->spouse_name,
+            'children_details' => $this->children_details,
+            'church_name' => $this->church_name,
+            'service_name' => $this->service_name,
         ];
 
         if ($this->photo) {

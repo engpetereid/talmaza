@@ -56,6 +56,24 @@
 
                 <form wire:submit="addMember" class="space-y-6">
                     <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+
+                        <!-- رفع الصورة (Preview UI) -->
+                        <div class="flex flex-col items-center justify-center pb-4 border-b border-gray-100 md:col-span-2">
+                            <label class="block mb-3 text-sm font-bold text-gray-700">الصورة</label>
+                            <div class="relative flex items-center justify-center w-24 h-24 overflow-hidden transition-colors border-2 border-indigo-200 border-dashed rounded-full cursor-pointer bg-indigo-50 hover:bg-indigo-100 group">
+                                @if ($photo)
+                                    <img src="{{ $photo->temporaryUrl() }}" class="object-cover w-full h-full">
+                                @else
+                                    <div class="text-indigo-400 group-hover:text-indigo-600">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                    </div>
+                                @endif
+                                <input type="file" wire:model="photo" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                            </div>
+                            <div wire:loading wire:target="photo" class="mt-2 text-xs font-bold text-indigo-600 animate-pulse">جاري الرفع المؤقت...</div>
+                            @error('photo') <p class="mt-2 text-sm font-bold text-red-600">{{ $message }}</p> @enderror
+                        </div>
+
                         <!-- Name -->
                         <div>
                             <label class="block mb-2 text-sm font-bold text-gray-700">الاسم ثلاثي <span class="text-red-500">*</span></label>
@@ -71,6 +89,13 @@
                                    class="w-full px-4 py-3 text-lg font-bold text-right text-gray-900 placeholder-gray-400 transition-all border-2 border-gray-200 bg-gray-50 rounded-xl focus:ring-indigo-500 focus:border-indigo-500 dir-ltr">
                         </div>
 
+                        <!-- Address -->
+                        <div>
+                            <label class="block mb-2 text-sm font-bold text-gray-700">العنوان</label>
+                            <input type="text" wire:model="new_address" placeholder="اسم الشارع، المنطقة..."
+                                   class="w-full px-4 py-3 text-lg font-bold text-gray-900 placeholder-gray-400 transition-all border-2 border-gray-200 bg-gray-50 rounded-xl focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+
                         <!-- Birth Date -->
                         <div>
                             <label class="block mb-2 text-sm font-bold text-gray-700">تاريخ الميلاد</label>
@@ -82,6 +107,34 @@
                         <div>
                             <label class="block mb-2 text-sm font-bold text-gray-700">الكلية / العمل</label>
                             <input type="text" wire:model="new_job_or_college" placeholder="مثال: هندسة / محاسب"
+                                   class="w-full px-4 py-3 text-lg font-bold text-gray-900 placeholder-gray-400 transition-all border-2 border-gray-200 bg-gray-50 rounded-xl focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+
+                        <!-- Spouse Name -->
+                        <div>
+                            <label class="block mb-2 text-sm font-bold text-gray-700">اسم الزوج / الزوجة (إن وجد)</label>
+                            <input type="text" wire:model="new_spouse_name" placeholder="الاسم..."
+                                   class="w-full px-4 py-3 text-lg font-bold text-gray-900 placeholder-gray-400 transition-all border-2 border-gray-200 bg-gray-50 rounded-xl focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+
+                        <!-- Children Details (Full Width) -->
+                        <div class="md:col-span-2">
+                            <label class="block mb-2 text-sm font-bold text-gray-700">أسماء الأبناء والمراحل التعليمية (إن وجد)</label>
+                            <textarea wire:model="new_children_details" rows="2" placeholder="مثال: مينا (ابتدائي)، مارينا (إعدادي)..."
+                                      class="w-full px-4 py-3 text-lg font-bold text-gray-900 placeholder-gray-400 transition-all border-2 border-gray-200 bg-gray-50 rounded-xl focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                        </div>
+
+                        <!-- Church Name -->
+                        <div>
+                            <label class="block mb-2 text-sm font-bold text-gray-700">اسم الكنيسة</label>
+                            <input type="text" wire:model="new_church_name" placeholder="اسم الكنيسة التابع لها..."
+                                   class="w-full px-4 py-3 text-lg font-bold text-gray-900 placeholder-gray-400 transition-all border-2 border-gray-200 bg-gray-50 rounded-xl focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+
+                        <!-- Service Name -->
+                        <div>
+                            <label class="block mb-2 text-sm font-bold text-gray-700">اسم الخدمة (إن كان خادماً)</label>
+                            <input type="text" wire:model="new_service_name" placeholder="مثال: خدمة إعدادي، كورال..."
                                    class="w-full px-4 py-3 text-lg font-bold text-gray-900 placeholder-gray-400 transition-all border-2 border-gray-200 bg-gray-50 rounded-xl focus:ring-indigo-500 focus:border-indigo-500">
                         </div>
 
@@ -103,9 +156,9 @@
                     <div class="flex justify-end pt-4 border-t border-gray-100">
                         <button type="submit"
                                 class="bg-indigo-600 text-white px-8 py-3 rounded-xl font-black shadow-lg shadow-indigo-200 hover:bg-indigo-700 hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 w-full md:w-auto">
-                            <span wire:loading.remove>حفظ وإضافة</span>
-                            <span wire:loading>جاري الإضافة...</span>
-                            <svg wire:loading.remove xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                            <span wire:loading.remove wire:target="addMember">حفظ وإضافة</span>
+                            <span wire:loading wire:target="addMember">جاري الإضافة...</span>
+                            <svg wire:loading.remove wire:target="addMember" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
                         </button>
                     </div>
                 </form>
@@ -134,6 +187,7 @@
                                 <a href="{{ route('member.stats', $member->id) }}" wire:navigate class="flex-shrink-0 block">
                                     <div class="w-16 h-16 rounded-2xl flex items-center justify-center font-black text-2xl shadow-sm border-2 transition-colors overflow-hidden {{ $member->is_active ? 'bg-indigo-50 text-indigo-600 border-indigo-100 group-hover:bg-indigo-600 group-hover:text-white' : 'bg-gray-200 text-gray-400 border-gray-300' }}">
                                         @if($member->photo_path)
+                                            <!-- عرض الصورة المحفوظة -->
                                             <img src="{{ asset('storage/' . $member->photo_path) }}" alt="{{ $member->name }}" class="object-cover w-full h-full">
                                         @else
                                             {{ mb_substr($member->name, 0, 1) }}
