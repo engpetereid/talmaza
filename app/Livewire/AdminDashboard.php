@@ -47,7 +47,6 @@ class AdminDashboard extends Component
         $families = $familiesQuery->get()->map(function ($family) {
             $lastMeeting = $family->weeklyMeetings->first();
 
-            // تحديد عنوان الدرس الأخير (سواء كان منهج أو موضوع حر)
             $lastLessonTitle = 'لم يبدأ بعد';
             if ($lastMeeting) {
                 $lastLessonTitle = $lastMeeting->lesson->title ?? $lastMeeting->custom_topic ?? 'درس بدون عنوان';
@@ -56,7 +55,7 @@ class AdminDashboard extends Component
             return [
                 'id' => $family->id,
                 'name' => $family->name,
-                'leader_name' => $family->user->where('role', 'leader')->first()->name ?? 'بدون قائد',
+                'leader_name' => $family->user->name ?? 'بدون قائد',
                 'members_count' => $family->members_count,
                 'last_lesson' => $lastLessonTitle,
                 'last_meeting_date' => $lastMeeting
