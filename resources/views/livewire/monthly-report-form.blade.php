@@ -237,59 +237,59 @@
             @endif
         </div>
 
-        <!-- 3. Member Notes -->
-        <div class="p-6 md:p-8 bg-white border border-gray-200 shadow-sm rounded-[2rem]">
-            <h3 class="flex items-center gap-2 pb-4 mb-6 text-xl font-black text-gray-800 border-b border-gray-100">
-                <span class="p-2 text-red-600 bg-red-100 rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
-                ملاحظات عن المخدومين
-            </h3>
+            <!-- 3. Member Notes -->
+            <div class="p-6 md:p-8 bg-white border border-gray-200 shadow-sm rounded-[2rem]">
+                <h3 class="flex items-center gap-2 pb-4 mb-6 text-xl font-black text-gray-800 border-b border-gray-100">
+                    <span class="p-2 text-red-600 bg-red-100 rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+                    ملاحظات عن المخدومين
+                </h3>
 
-            <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-                @foreach($familyMembers as $member)
-                    @if($member->is_active || !empty($members_notes[$member->id]['text']))
-                        <div class="p-5 transition-colors border-2 border-gray-100 bg-gray-50 rounded-2xl hover:border-red-200">
-                            <div class="flex items-center gap-3 pb-3 mb-3 border-b border-gray-200">
-                                <div class="flex items-center justify-center w-10 h-10 text-sm font-black text-gray-600 bg-white border border-gray-200 rounded-full shadow-sm">
-                                    {{ mb_substr($member->name, 0, 1) }}
-                                </div>
-                                <span class="text-base font-bold text-gray-900 {{ !$member->is_active ? 'line-through opacity-50' : '' }}">
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    @foreach($familyMembers as $member)
+                        @if($member->is_active || !empty($members_notes[$member->id]['text']) || !empty($members_notes[$member->id]['replies']))
+                            <div class="p-5 transition-colors border-2 border-gray-100 bg-gray-50 rounded-2xl hover:border-red-200">
+                                <div class="flex items-center gap-3 pb-3 mb-3 border-b border-gray-200">
+                                    <div class="flex items-center justify-center w-10 h-10 text-sm font-black text-gray-600 bg-white border border-gray-200 rounded-full shadow-sm">
+                                        {{ mb_substr($member->name, 0, 1) }}
+                                    </div>
+                                    <span class="text-base font-bold text-gray-900 {{ !$member->is_active ? 'line-through opacity-50' : '' }}">
                                     {{ $member->name }}
                                 </span>
-                            </div>
-                            @if(!$isReadOnly)
-                                <textarea wire:model="members_notes.{{ $member->id }}.text" rows="2"
-                                          class="w-full p-4 text-sm font-medium bg-white border-2 border-gray-200 rounded-xl focus:ring-red-500 focus:border-red-500 placeholder-gray-400"
-                                          placeholder="اكتب ملاحظة أو توجيه بخصوص المخدوم..."></textarea>
-                            @else
-                                <div class="p-4 border border-gray-200 bg-white rounded-xl text-sm font-bold text-gray-800 leading-relaxed min-h-[60px]">
-                                    {{ $members_notes[$member->id]['text'] ?? 'لا توجد ملاحظات' }}
                                 </div>
-                            @endif
-
-                            <!-- Threaded Replies for Member Notes -->
-                            @if($isReadOnly && !empty($members_notes[$member->id]['text']))
-                                <div class="space-y-3 mt-4">
-                                    @foreach($members_notes[$member->id]['replies'] ?? [] as $reply)
-                                        <div class="flex items-start gap-2 p-3 text-xs border rounded-xl {{ $reply['role'] == 'admin' ? 'bg-red-50 border-red-100' : 'bg-indigo-50 border-indigo-100' }}">
-                                            <span class="font-black shrink-0 {{ $reply['role'] == 'admin' ? 'text-red-800' : 'text-indigo-800' }}"> {{ $reply['name'] ?? 'الإدارة' }}:</span>
-                                            <span class="font-bold leading-relaxed {{ $reply['role'] == 'admin' ? 'text-red-900' : 'text-indigo-900' }}">{{ $reply['text'] }}</span>
-                                        </div>
-                                    @endforeach
-
-                                    <!-- Input for NEW reply -->
-                                    <div class="flex items-start gap-2 pt-2">
-                                        <span class="text-[10px] bg-red-100 text-red-800 font-black px-2 py-1.5 rounded-lg shrink-0">رد:</span>
-                                        <textarea wire:model="members_notes.{{ $member->id }}.new_reply" rows="2"
-                                                  class="w-full p-3 text-xs font-bold border-2 border-red-200 rounded-xl focus:ring-red-500 focus:border-red-500 bg-red-50/50"
-                                                  placeholder="إضافة تعقيب..."></textarea>
+                                @if(!$isReadOnly)
+                                    <textarea wire:model="members_notes.{{ $member->id }}.text" rows="2"
+                                              class="w-full p-4 text-sm font-medium bg-white border-2 border-gray-200 rounded-xl focus:ring-red-500 focus:border-red-500 placeholder-gray-400"
+                                              placeholder="اكتب ملاحظة أو توجيه بخصوص المخدوم..."></textarea>
+                                @else
+                                    <div class="p-4 border border-gray-200 bg-white rounded-xl text-sm font-bold text-gray-800 leading-relaxed min-h-[60px]">
+                                        {{ $members_notes[$member->id]['text'] ?: 'لا توجد ملاحظات من القائد' }}
                                     </div>
-                                </div>
-                            @endif
-                        </div>
-                    @endif
-                @endforeach
+                                @endif
+
+                                <!-- Threaded Replies for Member Notes (تم تعديل الشرط هنا ليظهر دائماً في وضع القراءة) -->
+                                @if($isReadOnly)
+                                    <div class="space-y-3 mt-4">
+                                        @foreach($members_notes[$member->id]['replies'] ?? [] as $reply)
+                                            <div class="flex items-start gap-2 p-3 text-xs border rounded-xl {{ $reply['role'] == 'admin' ? 'bg-red-50 border-red-100' : 'bg-indigo-50 border-indigo-100' }}">
+                                                <span class="font-black shrink-0 {{ $reply['role'] == 'admin' ? 'text-red-800' : 'text-indigo-800' }}"> {{ $reply['name'] ?? 'الإدارة' }}:</span>
+                                                <span class="font-bold leading-relaxed {{ $reply['role'] == 'admin' ? 'text-red-900' : 'text-indigo-900' }}">{{ $reply['text'] }}</span>
+                                            </div>
+                                        @endforeach
+
+                                        <!-- Input for NEW reply -->
+                                        <div class="flex items-start gap-2 pt-2">
+                                            <span class="text-[10px] bg-red-100 text-red-800 font-black px-2 py-1.5 rounded-lg shrink-0">رد:</span>
+                                            <textarea wire:model="members_notes.{{ $member->id }}.new_reply" rows="2"
+                                                      class="w-full p-3 text-xs font-bold border-2 border-red-200 rounded-xl focus:ring-red-500 focus:border-red-500 bg-red-50/50"
+                                                      placeholder="إضافة تعقيب أو توجيه لهذا المخدوم..."></textarea>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                        @endif
+                    @endforeach
+                </div>
             </div>
-        </div>
 
         <!-- 4. Priest Messages -->
         <div class="p-6 md:p-8 bg-white border-2 shadow-sm rounded-[2rem] border-blue-200">
@@ -372,6 +372,12 @@
                 </button>
             </div>
         @endif
+            @if (session()->has('message'))
+                <div class="flex items-center gap-3 p-4 font-bold text-green-800 bg-green-100 border-r-4 border-green-500 rounded-xl animate-fade-in-down">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    {{ session('message') }}
+                </div>
+            @endif
             @if(Auth::user()->role == 'admin')
             <button wire:click="saveReplies" wire:loading.attr="disabled" class="flex items-center gap-2 px-6 py-3 font-bold text-white transition-transform bg-green-600 shadow-lg hover:bg-green-700 rounded-xl shadow-green-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
                 <span wire:loading.remove wire:target="saveReplies">حفظ الردود</span>

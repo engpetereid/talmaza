@@ -29,8 +29,8 @@ class MonthlyReportForm extends Component
     // --- Stats Data ---
     public $stats_snapshot = [];
     public $members_monthly_stats = [];
-    public $stats_replies = []; // 👈 الردود الخاصة بقسم الإحصائيات
-    public $stats_new_reply = ''; // 👈 الرد الجديد للإحصائيات
+    public $stats_replies = [];
+    public $stats_new_reply = '';
 
     public $priest_message = [];
     public $familyMembers = [];
@@ -47,16 +47,16 @@ class MonthlyReportForm extends Component
             $this->family = $report->family;
             $this->isReadOnly = true;
 
-            $this->monthly_summary = $this->normalizeSection($report->monthly_summary ?? [['text' => '']]);
+            $this->monthly_summary = $this->normalizeSection($report->monthly_summary ?? []);
             $this->stats_snapshot = $report->stats_snapshot ?? [];
-            $this->stats_replies = is_array($report->stats_replies) ? $report->stats_replies : []; // 👈 استرجاع ردود الإحصائيات
+            $this->stats_replies = is_array($report->stats_replies) ? $report->stats_replies : [];
             $this->report_date_input = Carbon::parse($report->report_date)->format('Y-m');
-            $this->priest_message = $this->normalizeSection($report->priest_message ?? [['text' => '']]);
+            $this->priest_message = $this->normalizeSection($report->priest_message ?? []);
             $this->members_notes = $this->normalizeMembersNotes($report->members_notes ?? []);
         } else {
             $this->family = Auth::user()->family;
-            $this->monthly_summary = $this->normalizeSection([['text' => '']]);
-            $this->priest_message = $this->normalizeSection([['text' => '']]);
+            $this->monthly_summary = $this->normalizeSection([]);
+            $this->priest_message = $this->normalizeSection([]);
         }
 
         if ($this->family) {
@@ -78,7 +78,15 @@ class MonthlyReportForm extends Component
 
     private function normalizeSection($section)
     {
-        if (!is_array($section)) return [];
+        if (!is_array($section)) {
+            $section = [];
+        }
+
+        // لو القسم فارغ، بنضيف عنصر واحد على الأقل عشان نقدر نرد عليه
+        if (empty($section)) {
+            $section = [['text' => '']];
+        }
+
         foreach ($section as &$item) {
             if (!isset($item['replies'])) {
                 $item['replies'] = [];
@@ -216,7 +224,7 @@ class MonthlyReportForm extends Component
             'monthly_summary' => $this->monthly_summary,
             'members_notes' => $this->members_notes,
             'stats_snapshot' => $this->stats_snapshot,
-            'stats_replies' => [], // 👈 إضافة حقل ردود الإحصائيات
+            'stats_replies' => [],
             'priest_message' => $this->priest_message,
         ]);
 
@@ -234,7 +242,6 @@ class MonthlyReportForm extends Component
         $userRole = Auth::user()->role;
         $userName = Auth::user()->name;
 
-        // ردود الأقسام العادية
         foreach (['monthly_summary', 'priest_message'] as $section) {
             if (is_array($this->$section)) {
                 foreach ($this->$section as &$item) {
@@ -247,7 +254,6 @@ class MonthlyReportForm extends Component
             }
         }
 
-        // ردود المخدومين
         if (is_array($this->members_notes)) {
             foreach ($this->members_notes as &$note) {
                 if (!empty($note['new_reply'])) {
@@ -258,7 +264,6 @@ class MonthlyReportForm extends Component
             }
         }
 
-        // 👈 الرد على قسم الإحصائيات الشاملة
         if (!empty($this->stats_new_reply)) {
             $this->stats_replies[] = ['role' => $userRole, 'name' => $userName, 'text' => $this->stats_new_reply, 'date' => now()->toDateTimeString()];
             $this->stats_new_reply = '';
@@ -269,7 +274,7 @@ class MonthlyReportForm extends Component
             $report->update([
                 'monthly_summary' => $this->monthly_summary,
                 'members_notes' => $this->members_notes,
-                'stats_replies' => $this->stats_replies, // 👈 حفظ ردود الإحصائيات في DB
+                'stats_replies' => $this->stats_replies,
                 'priest_message' => $this->priest_message,
                 'admin_reply_at' => $userRole === 'admin' ? now() : $report->admin_reply_at,
             ]);
