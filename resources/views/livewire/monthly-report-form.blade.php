@@ -378,7 +378,7 @@
                     {{ session('message') }}
                 </div>
             @endif
-            @if(Auth::user()->role == 'admin')
+            @if($isReadOnly)
             <button wire:click="saveReplies" wire:loading.attr="disabled" class="flex items-center gap-2 px-6 py-3 font-bold text-white transition-transform bg-green-600 shadow-lg hover:bg-green-700 rounded-xl shadow-green-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
                 <span wire:loading.remove wire:target="saveReplies">حفظ الردود</span>
                 <span wire:loading wire:target="saveReplies">جاري الحفظ...</span>
