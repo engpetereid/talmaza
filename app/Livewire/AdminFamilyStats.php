@@ -113,66 +113,13 @@ class AdminFamilyStats extends Component
         }
 
         // --- 2. Calculate Member Stats (Monthly Average) ---
+        // Inactive members are still listed (marked in the view), but family averages use active members only.
         foreach ($members as $member) {
-            $counters = array_fill_keys(array_keys($this->metricsConfig), 0);
-
-            foreach ($meetings as $meeting) {
-                $record = $meeting->tatmimRecords->where('member_id', $member->id)->first();
-
-                if ($record) {
-                    // Accumulate scores for average calculation
-                    $maxNote = max($meeting->max_note_score, 1);
-
-                    if ($record->is_present) $counters['attendance'] += 100;
-                    if ($record->has_mass) $counters['mass'] += 100;
-                    if ($record->has_weekly_kholwa) $counters['weekly_kholwa'] += 100;
-                    if ($record->has_tasbeha) $counters['tasbeha'] += 100;
-                    if ($record->has_vespers) $counters['vespers'] += 100;
-                    if ($record->has_servants_meeting) $counters['servants'] += 100;
-                    if ($record->has_reading) $counters['reading'] += 100;
-                    if ($record->has_family_altar) $counters['altar'] += 100;
-                    if ($record->has_sermon) $counters['sermon'] += 100;
-
-                    $counters['note'] += ($record->note_score / $maxNote) * 100;
-                    $counters['kholwa'] += min(($record->kholwa_count / 7) * 100, 100);
-                    $counters['training'] += min(($record->talmaza_training_count / 7) * 100, 100);
-                }
-            }
-
-            // Final Stats
-            $stats = [];
-            $totalSum = 0;
-            foreach ($counters as $key => $val) {
-                $avg = round($val / $meetingsCount);
-                $stats[$key] = $avg;
-                $totalSum += $avg;
-            }
-
-            $stats['id'] = $member->id; // ADDED ID
-            $stats['name'] = $member->name;
-            $stats['is_active'] = $member->is_active;
-            $stats['total_average'] = round($totalSum / count($counters));
-
-            $membersStats[] = $stats;
+            $membersStats[] = $statsService->calculateMemberStats($member, $meetings);
         }
 
-        usort($membersStats, function ($a, $b) {
-            return $b['total_average'] <=> $a['total_average'];
-        });
-        // Calculate Family Averages
-        $familyAverages = [];
-        $activeMembersCount = count($membersStats);
-
-        if ($activeMembersCount > 0) {
-            // Get the keys to average from the service's empty counters plus the total average
-            $keys = array_keys($statsService->calculateRecordStats(null, $meetings->first()));
-            $keys[] = 'total_average';
-
-            foreach ($keys as $key) {
-                $sum = array_sum(array_column($membersStats, $key));
-                $familyAverages[$key] = round($sum / $activeMembersCount);
-            }
-        }
+        $membersStats = $statsService->sortMembersStats($membersStats);
+        $familyAverages = $statsService->calculateFamilyAverages($membersStats);
 
         return [
             'family_averages' => $familyAverages,

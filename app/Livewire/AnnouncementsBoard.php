@@ -58,6 +58,7 @@ class AnnouncementsBoard extends Component
         // 1. Save the announcement to the database
         Announcement::create([
             'user_id' => Auth::id(),
+            'type' => 'announcement',
             'title' => $this->title,
             'content' => $this->content,
             'attachment' => $path,
@@ -101,7 +102,7 @@ class AnnouncementsBoard extends Component
     {
         if (Auth::user()->role !== 'admin') { return; }
 
-        $post = Announcement::find($id);
+        $post = Announcement::where('type', 'announcement')->find($id);
         if ($post) {
             if ($post->attachment) {
                 Storage::disk('public')->delete($post->attachment);
@@ -112,7 +113,8 @@ class AnnouncementsBoard extends Component
 
     public function render()
     {
-        $query = Announcement::with('user')->latest();
+        // Decisions have their own board — show announcements only
+        $query = Announcement::with('user')->where('type', 'announcement')->latest();
 
         if (!empty($this->search)) {
             $query->where(function($q) {

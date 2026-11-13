@@ -61,7 +61,7 @@ class AdminReportsReview extends Component
     public function render()
     {
         // ترتيب التقارير حسب آخر نشاط (رد) لكي تصعد المحادثات النشطة للأعلى
-        $query = Report::with('family')->latest('created_at');
+        $query = Report::with('family.leader')->latest('created_at');
 
         // 1. تطبيق فلاتر الشهر والسنة على التقارير
         if ($this->filterMonth !== 'all') {
@@ -95,9 +95,7 @@ class AdminReportsReview extends Component
                 ->toArray();
 
             // جلب العائلات التي غير موجودة في القائمة السابقة
-            $missingFamilies = Family::with(['user' => function ($q) {
-                $q->where('role', 'leader');
-            }])->whereNotIn('id', $submittedFamilyIds)->get();
+            $missingFamilies = Family::with('leader')->whereNotIn('id', $submittedFamilyIds)->get();
         }
 
         return view('livewire.admin-reports-review', [

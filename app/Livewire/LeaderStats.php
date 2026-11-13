@@ -50,25 +50,8 @@ class LeaderStats extends Component
             $membersStats[] = $stats;
         }
 
-        // Sort by Total Average
-        usort($membersStats, function ($a, $b) {
-            return $b['total_average'] <=> $a['total_average'];
-        });
-
-        // Calculate Family Averages
-        $familyAverages = [];
-        $activeMembersCount = count($membersStats);
-
-        if ($activeMembersCount > 0) {
-            // Get the keys to average from the service's empty counters plus the total average
-            $keys = array_keys($statsService->calculateRecordStats(null, $meetings->first()));
-            $keys[] = 'total_average';
-
-            foreach ($keys as $key) {
-                $sum = array_sum(array_column($membersStats, $key));
-                $familyAverages[$key] = round($sum / $activeMembersCount);
-            }
-        }
+        $membersStats = $statsService->sortMembersStats($membersStats);
+        $familyAverages = $statsService->calculateFamilyAverages($membersStats);
 
         return [
             'meetings_count' => $meetingsCount,

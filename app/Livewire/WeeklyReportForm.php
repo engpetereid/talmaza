@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 use App\Models\Report;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -16,8 +17,10 @@ use Kreait\Firebase\Messaging\WebPushConfig;
 #[Layout('layouts.app')]
 class WeeklyReportForm extends Component
 {
+    #[Locked]
     public $reportId;
     public $family;
+    #[Locked]
     public $isReadOnly = false;
 
     public $timeline = [];
@@ -109,6 +112,11 @@ class WeeklyReportForm extends Component
 
     public function save()
     {
+        // لا يمكن إنشاء تقرير جديد من صفحة عرض تقرير، أو بدون عائلة
+        if ($this->isReadOnly || !$this->family) {
+            return;
+        }
+
         $this->weekly_achievements = array_values(array_filter($this->weekly_achievements, fn($i) => !empty($i['text'])));
         $this->priest_message = array_values(array_filter($this->priest_message, fn($i) => !empty($i['text'])));
 
@@ -137,47 +145,54 @@ class WeeklyReportForm extends Component
 
     public function saveReplies()
     {
-        $report = Report::find($this->reportId);
+        $report = $this->authorizedReport();
         if (!$report) return;
 
         $hasNewReplies = false;
         $userRole = Auth::user()->role;
         $userName = Auth::user()->name;
 
-        $sections = ['timeline', 'weekly_achievements', 'priest_message'];
-        foreach ($sections as $section) {
-            if (is_array($this->$section)) {
-                foreach ($this->$section as &$item) {
-                    if (!empty($item['new_reply'])) {
-                        $item['replies'][] = ['role' => $userRole, 'name' => $userName, 'text' => $item['new_reply'], 'date' => now()->toDateTimeString()];
-                        $item['new_reply'] = '';
-                        $hasNewReplies = true;
-                    }
+        // نبني الأقسام من البيانات المحفوظة في قاعدة البيانات (وليس من المتصفح)
+        // ونضيف عليها الردود الجديدة فقط، حتى لا يمكن تعديل محتوى التقرير بعد إرساله
+        $stored = [
+            'timeline' => $this->normalizeSection($report->timeline ?? [['time' => '', 'activity' => '']]),
+            'weekly_achievements' => $this->normalizeSection($report->weekly_achievements ?? [['text' => '']]),
+            'priest_message' => $this->normalizeSection($report->priest_message ?? [['text' => '']]),
+        ];
+
+        foreach ($stored as $section => &$items) {
+            foreach ($items as $i => &$item) {
+                $text = $this->draftText($this->{$section}[$i]['new_reply'] ?? '');
+                if ($text !== '') {
+                    $item['replies'][] = $this->makeReply($userRole, $userName, $text);
+                    $hasNewReplies = true;
                 }
             }
+            unset($item);
         }
+        unset($items);
 
-        // Visitation Replies
-        if (!empty($this->visitation_new_reply)) {
-            $this->visitation_replies[] = ['role' => $userRole, 'name' => $userName, 'text' => $this->visitation_new_reply, 'date' => now()->toDateTimeString()];
-            $this->visitation_new_reply = '';
+        $visitationReplies = is_array($report->visitation_replies) ? $report->visitation_replies : [];
+        $text = $this->draftText($this->visitation_new_reply);
+        if ($text !== '') {
+            $visitationReplies[] = $this->makeReply($userRole, $userName, $text);
             $hasNewReplies = true;
         }
 
-        // Session Time Replies
-        if (!empty($this->session_new_reply)) {
-            $this->session_replies[] = ['role' => $userRole, 'name' => $userName, 'text' => $this->session_new_reply, 'date' => now()->toDateTimeString()];
-            $this->session_new_reply = '';
+        $sessionReplies = is_array($report->session_replies) ? $report->session_replies : [];
+        $text = $this->draftText($this->session_new_reply);
+        if ($text !== '') {
+            $sessionReplies[] = $this->makeReply($userRole, $userName, $text);
             $hasNewReplies = true;
         }
 
         if ($hasNewReplies) {
             $report->update([
-                'timeline' => $this->timeline,
-                'weekly_achievements' => $this->weekly_achievements,
-                'visitation_replies' => $this->visitation_replies,
-                'session_replies' => $this->session_replies,
-                'priest_message' => $this->priest_message,
+                'timeline' => $this->withoutDrafts($stored['timeline']),
+                'weekly_achievements' => $this->withoutDrafts($stored['weekly_achievements']),
+                'priest_message' => $this->withoutDrafts($stored['priest_message']),
+                'visitation_replies' => $visitationReplies,
+                'session_replies' => $sessionReplies,
                 'admin_reply_at' => $userRole === 'admin' ? now() : $report->admin_reply_at,
             ]);
 
@@ -186,14 +201,59 @@ class WeeklyReportForm extends Component
             $this->notifyUsers($report, $title, $body, true);
         }
 
+        // Refresh component state from what was actually saved
+        $this->timeline = $stored['timeline'];
+        $this->weekly_achievements = $stored['weekly_achievements'];
+        $this->priest_message = $stored['priest_message'];
+        $this->visitation_replies = $visitationReplies;
+        $this->session_replies = $sessionReplies;
+        $this->visitation_new_reply = '';
+        $this->session_new_reply = '';
+
         session()->flash('message', 'تم حفظ الردود بنجاح ✅');
     }
 
     public function closeReplies()
     {
-        $report = Report::find($this->reportId);
-        $report->update(['admin_reply_at' => Auth::user()->role === 'admin' ? now() : $report->admin_reply_at]);
+        $report = $this->authorizedReport();
+        if (!$report || Auth::user()->role !== 'admin') return;
+
+        $report->update(['admin_reply_at' => now()]);
         session()->flash('message', 'تم الاغلاق بنجاح ✅');
+    }
+
+    /**
+     * Load the report being viewed and make sure the current user may access it.
+     */
+    private function authorizedReport(): ?Report
+    {
+        $report = $this->reportId ? Report::find($this->reportId) : null;
+        if (!$report) return null;
+
+        $user = Auth::user();
+        if ($user->role !== 'admin' && $user->family_id !== $report->family_id) {
+            abort(403);
+        }
+
+        return $report;
+    }
+
+    private function draftText($value): string
+    {
+        return is_string($value) ? trim($value) : '';
+    }
+
+    private function makeReply(string $role, string $name, string $text): array
+    {
+        return ['role' => $role, 'name' => $name, 'text' => $text, 'date' => now()->toDateTimeString()];
+    }
+
+    private function withoutDrafts(array $items): array
+    {
+        return array_map(function ($item) {
+            unset($item['new_reply']);
+            return $item;
+        }, $items);
     }
 
     private function notifyUsers($report, $title, $body, $isReply = false)

@@ -46,7 +46,7 @@
                 </div>
                 <div class="p-4 text-center bg-white border border-gray-100 shadow-sm rounded-2xl">
                     <span class="block mb-1 text-xs text-gray-400">المخدومين</span>
-                    <span class="text-2xl font-bold text-purple-600">{{ count($data['members_stats']) }}</span>
+                    <span class="text-2xl font-bold text-purple-600">{{ collect($data['members_stats'])->where('is_active', true)->count() }}</span>
                 </div>
             </div>
 

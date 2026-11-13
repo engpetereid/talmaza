@@ -151,10 +151,10 @@
                                         <div class="flex items-start justify-between mb-4">
                                             <div class="flex items-center gap-3">
                                                 <div class="flex items-center justify-center w-12 h-12 text-lg font-black text-gray-600 bg-gray-100 border border-gray-200 rounded-2xl">
-                                                    {{ mb_substr($resource->user->name, 0, 1) }}
+                                                    {{ mb_substr($resource->user?->name ?? '؟', 0, 1) }}
                                                 </div>
                                                 <div>
-                                                    <p class="text-base font-bold text-gray-900">{{ $resource->user->name }}</p>
+                                                    <p class="text-base font-bold text-gray-900">{{ $resource->user?->name ?? 'مستخدم محذوف' }}</p>
                                                     <p class="text-xs font-bold text-gray-400">{{ $resource->created_at->diffForHumans() }}</p>
                                                 </div>
                                             </div>

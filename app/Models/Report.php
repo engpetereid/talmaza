@@ -16,6 +16,7 @@ class Report extends Model
         'timeline',
         'weekly_achievements',
         'visitation_hours',
+        'visitation_replies',
         'monthly_summary',
         'members_notes',
         'stats_snapshot',

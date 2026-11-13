@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 use App\Models\Report;
 use App\Models\WeeklyMeeting;
 use App\Models\User;
@@ -18,8 +19,10 @@ use Carbon\Carbon;
 #[Layout('layouts.app')]
 class MonthlyReportForm extends Component
 {
+    #[Locked]
     public $reportId;
     public $family;
+    #[Locked]
     public $isReadOnly = false;
 
     public $report_date_input;
@@ -122,8 +125,21 @@ class MonthlyReportForm extends Component
 
     public function updatedReportDateInput() { $this->calculateMonthlyStats(); }
 
-    public function addItem($listName) { $this->$listName[] = ['text' => '', 'replies' => [], 'new_reply' => '']; }
-    public function removeItem($listName, $index) { unset($this->$listName[$index]); $this->$listName = array_values($this->$listName); }
+    // فقط هذه القوائم يمكن الإضافة/الحذف منها، وفقط أثناء كتابة تقرير جديد
+    private const EDITABLE_LISTS = ['monthly_summary', 'priest_message'];
+
+    public function addItem($listName)
+    {
+        if ($this->isReadOnly || !in_array($listName, self::EDITABLE_LISTS, true)) return;
+        $this->$listName[] = ['text' => '', 'replies' => [], 'new_reply' => ''];
+    }
+
+    public function removeItem($listName, $index)
+    {
+        if ($this->isReadOnly || !in_array($listName, self::EDITABLE_LISTS, true)) return;
+        unset($this->$listName[$index]);
+        $this->$listName = array_values($this->$listName);
+    }
 
     public function initMembersNotes()
     {
@@ -214,6 +230,11 @@ class MonthlyReportForm extends Component
 
     public function save()
     {
+        // لا يمكن إنشاء تقرير جديد من صفحة عرض تقرير، أو بدون عائلة
+        if ($this->isReadOnly || !$this->family) {
+            return;
+        }
+
         $this->monthly_summary = array_values(array_filter($this->monthly_summary, fn($i) => !empty($i['text'])));
         $this->priest_message = array_values(array_filter($this->priest_message, fn($i) => !empty($i['text'])));
 
@@ -235,47 +256,58 @@ class MonthlyReportForm extends Component
 
     public function saveReplies()
     {
-        $report = Report::find($this->reportId);
+        $report = $this->authorizedReport();
         if (!$report) return;
 
         $hasNewReplies = false;
         $userRole = Auth::user()->role;
         $userName = Auth::user()->name;
 
-        foreach (['monthly_summary', 'priest_message'] as $section) {
-            if (is_array($this->$section)) {
-                foreach ($this->$section as &$item) {
-                    if (!empty($item['new_reply'])) {
-                        $item['replies'][] = ['role' => $userRole, 'name' => $userName, 'text' => $item['new_reply'], 'date' => now()->toDateTimeString()];
-                        $item['new_reply'] = '';
-                        $hasNewReplies = true;
-                    }
-                }
-            }
-        }
+        // نبني الأقسام من البيانات المحفوظة في قاعدة البيانات (وليس من المتصفح)
+        // ونضيف عليها الردود الجديدة فقط، حتى لا يمكن تعديل محتوى التقرير بعد إرساله
+        $stored = [
+            'monthly_summary' => $this->normalizeSection($report->monthly_summary ?? []),
+            'priest_message' => $this->normalizeSection($report->priest_message ?? []),
+        ];
 
-        if (is_array($this->members_notes)) {
-            foreach ($this->members_notes as &$note) {
-                if (!empty($note['new_reply'])) {
-                    $note['replies'][] = ['role' => $userRole, 'name' => $userName, 'text' => $note['new_reply'], 'date' => now()->toDateTimeString()];
-                    $note['new_reply'] = '';
+        foreach ($stored as $section => &$items) {
+            foreach ($items as $i => &$item) {
+                $text = $this->draftText($this->{$section}[$i]['new_reply'] ?? '');
+                if ($text !== '') {
+                    $item['replies'][] = $this->makeReply($userRole, $userName, $text);
                     $hasNewReplies = true;
                 }
             }
+            unset($item);
+        }
+        unset($items);
+
+        // ملاحظات المخدومين: نقبل الردود فقط على أعضاء هذه العائلة
+        $membersNotes = $this->normalizeMembersNotes($report->members_notes ?? []);
+        foreach ($report->family->members()->pluck('id') as $memberId) {
+            $text = $this->draftText($this->members_notes[$memberId]['new_reply'] ?? '');
+            if ($text === '') continue;
+
+            if (!isset($membersNotes[$memberId])) {
+                $membersNotes[$memberId] = ['text' => '', 'replies' => [], 'new_reply' => ''];
+            }
+            $membersNotes[$memberId]['replies'][] = $this->makeReply($userRole, $userName, $text);
+            $hasNewReplies = true;
         }
 
-        if (!empty($this->stats_new_reply)) {
-            $this->stats_replies[] = ['role' => $userRole, 'name' => $userName, 'text' => $this->stats_new_reply, 'date' => now()->toDateTimeString()];
-            $this->stats_new_reply = '';
+        $statsReplies = is_array($report->stats_replies) ? $report->stats_replies : [];
+        $text = $this->draftText($this->stats_new_reply);
+        if ($text !== '') {
+            $statsReplies[] = $this->makeReply($userRole, $userName, $text);
             $hasNewReplies = true;
         }
 
         if ($hasNewReplies) {
             $report->update([
-                'monthly_summary' => $this->monthly_summary,
-                'members_notes' => $this->members_notes,
-                'stats_replies' => $this->stats_replies,
-                'priest_message' => $this->priest_message,
+                'monthly_summary' => $this->withoutDrafts($stored['monthly_summary']),
+                'priest_message' => $this->withoutDrafts($stored['priest_message']),
+                'members_notes' => $this->withoutDrafts($membersNotes),
+                'stats_replies' => $statsReplies,
                 'admin_reply_at' => $userRole === 'admin' ? now() : $report->admin_reply_at,
             ]);
 
@@ -283,14 +315,65 @@ class MonthlyReportForm extends Component
             $body = $userRole === 'admin' ? "تم الرد على تقريرك بواسطة {$userName}." : "قام {$userName} بالرد على ملاحظات التقرير.";
             $this->notifyUsers($report, $title, $body, true);
         }
+
+        // Refresh component state from what was actually saved
+        $this->monthly_summary = $stored['monthly_summary'];
+        $this->priest_message = $stored['priest_message'];
+        $this->stats_replies = $statsReplies;
+        $this->stats_new_reply = '';
+        foreach ($membersNotes as $memberId => $note) {
+            $this->members_notes[$memberId] = $note;
+        }
+        foreach ($this->members_notes as $memberId => $note) {
+            if (!isset($membersNotes[$memberId])) {
+                $this->members_notes[$memberId] = ['text' => '', 'replies' => [], 'new_reply' => ''];
+            }
+        }
+
         session()->flash('message', 'تم حفظ الردود بنجاح ✅');
     }
 
     public function closeReplies()
     {
-        $report = Report::find($this->reportId);
-        $report->update(['admin_reply_at' => Auth::user()->role === 'admin' ? now() : $report->admin_reply_at]);
+        $report = $this->authorizedReport();
+        if (!$report || Auth::user()->role !== 'admin') return;
+
+        $report->update(['admin_reply_at' => now()]);
         session()->flash('message', 'تم الاغلاق بنجاح ✅');
+    }
+
+    /**
+     * Load the report being viewed and make sure the current user may access it.
+     */
+    private function authorizedReport(): ?Report
+    {
+        $report = $this->reportId ? Report::find($this->reportId) : null;
+        if (!$report) return null;
+
+        $user = Auth::user();
+        if ($user->role !== 'admin' && $user->family_id !== $report->family_id) {
+            abort(403);
+        }
+
+        return $report;
+    }
+
+    private function draftText($value): string
+    {
+        return is_string($value) ? trim($value) : '';
+    }
+
+    private function makeReply(string $role, string $name, string $text): array
+    {
+        return ['role' => $role, 'name' => $name, 'text' => $text, 'date' => now()->toDateTimeString()];
+    }
+
+    private function withoutDrafts(array $items): array
+    {
+        return array_map(function ($item) {
+            if (is_array($item)) unset($item['new_reply']);
+            return $item;
+        }, $items);
     }
 
     private function notifyUsers($report, $title, $body, $isReply = false)

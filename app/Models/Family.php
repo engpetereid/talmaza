@@ -16,6 +16,14 @@ class Family extends Model
         return $this->hasOne(User::class);
     }
 
+    /**
+     * The leader account of this family.
+     */
+    public function leader()
+    {
+        return $this->hasOne(User::class)->where('role', 'leader');
+    }
+
 
     public function members()
     {

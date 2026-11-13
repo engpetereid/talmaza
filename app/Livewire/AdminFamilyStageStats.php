@@ -97,12 +97,11 @@ class AdminFamilyStageStats extends Component
             $membersStats[] = $stats;
         }
 
-        // Sort by Performance
-        usort($membersStats, function ($a, $b) {
-            return $b['total_average'] <=> $a['total_average'];
-        });
+        // Sort: active members first, then by performance
+        $membersStats = $statsService->sortMembersStats($membersStats);
 
         return [
+            'family_averages' => $statsService->calculateFamilyAverages($membersStats),
             'meetings_count' => $meetingsCount,
             'members_stats' => $membersStats,
             'chart_data' => $chartData,

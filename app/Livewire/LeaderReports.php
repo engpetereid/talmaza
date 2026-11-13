@@ -4,29 +4,37 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
 use App\Models\Report;
 
 #[Layout('layouts.app')]
 class LeaderReports extends Component
 {
+    private const MAX_PIN_ATTEMPTS = 5;
+    private const PIN_LOCKOUT_SECONDS = 300;
+
     // Lock Screen Variables
+    // #[Locked] prevents the browser from flipping this value directly (PIN bypass).
+    #[Locked]
     public $isLocked = true;
     public $pinAttempt = '';
     public $errorMsg = '';
 
     public function mount()
     {
-        // 1. Check Session: Is it already unlocked?
-        if (session()->has('reports_unlocked_' . Auth::id())) {
-            $this->isLocked = false;
-        }
-
-        // 2. Check Requirement: Does user have a PIN?
+        // 1. Check Requirement: Does user have a PIN?
         if (!Auth::user()->report_pin) {
             session()->flash('pin-status','يرجى تعيين كود حماية للتقارير أولاً 🔒');
             $this->redirect(route('profile'),navigate: true);
             return;
+        }
+
+        // 2. Check Session: Is it already unlocked?
+        if (session()->has($this->sessionKey())) {
+            $this->isLocked = false;
         }
     }
 
@@ -35,14 +43,29 @@ class LeaderReports extends Component
      */
     public function unlock()
     {
-        if ($this->pinAttempt == Auth::user()->report_pin) {
+        $throttleKey = 'report-pin:' . Auth::id();
+
+        if (RateLimiter::tooManyAttempts($throttleKey, self::MAX_PIN_ATTEMPTS)) {
+            $minutes = ceil(RateLimiter::availableIn($throttleKey) / 60);
+            $this->errorMsg = "محاولات كثيرة خاطئة، حاول مرة أخرى بعد {$minutes} دقيقة ⏳";
+            $this->pinAttempt = '';
+            return;
+        }
+
+        $storedPin = Auth::user()->report_pin;
+
+        if ($storedPin && is_string($this->pinAttempt) && $this->pinAttempt !== ''
+            && Hash::check($this->pinAttempt, $storedPin)) {
+            RateLimiter::clear($throttleKey);
             $this->isLocked = false;
-            session()->put('reports_unlocked_' . Auth::id(), true);
+            session()->put($this->sessionKey(), true);
             $this->errorMsg = '';
         } else {
+            RateLimiter::hit($throttleKey, self::PIN_LOCKOUT_SECONDS);
             $this->errorMsg = 'الكود غير صحيح ❌';
-            $this->pinAttempt = '';
         }
+
+        $this->pinAttempt = '';
     }
 
     /**
@@ -61,6 +84,11 @@ class LeaderReports extends Component
             $report->delete();
             session()->flash('message', 'تم حذف التقرير بنجاح 🗑️');
         }
+    }
+
+    private function sessionKey(): string
+    {
+        return 'reports_unlocked_' . Auth::id();
     }
 
     public function render()

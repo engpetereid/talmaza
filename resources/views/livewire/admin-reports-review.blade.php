@@ -103,6 +103,12 @@
                                     {{ $report->type == 'weekly' ? '📅' : '📊' }}
                                 </div>
 
+                                <a href="{{ route('report.pdf', $report->id) }}"
+                                   class="flex items-center justify-center w-10 h-10 text-gray-400 transition-colors rounded-xl hover:text-indigo-600 hover:bg-indigo-50"
+                                   title="تحميل PDF">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                </a>
+
                                 <!-- Delete Action -->
                                 <button wire:click="deleteReport({{ $report->id }})"
                                         wire:confirm="هل أنت متأكد من حذف هذا التقرير نهائياً؟"
@@ -152,7 +158,7 @@
                             </h4>
                             <h3 class="font-bold ">
                                 القائد
-                                {{ $report->family->user->name }}
+                                {{ $report->family?->leader?->name ?? 'بدون قائد' }}
                             </h3>
 
                             <p class="mb-4 text-sm font-medium text-gray-500">
@@ -227,7 +233,7 @@
                                 <h4 class="text-lg font-bold text-gray-900">{{ $missingFamily->name }}</h4>
                                 <p class="flex items-center gap-1 mt-1 text-sm font-medium text-gray-500">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                                    القائد: {{ $missingFamily->user->first()->name ?? 'غير محدد' }}
+                                    القائد: {{ $missingFamily->leader?->name ?? 'غير محدد' }}
                                 </p>
                             </div>
 

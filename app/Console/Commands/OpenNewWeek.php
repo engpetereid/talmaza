@@ -33,19 +33,13 @@ class OpenNewWeek extends Command
 
         Family::chunk(100, function ($families) use ($today, &$count) {
             foreach ($families as $family) {
-                // التحقق من وجود اجتماع في هذا التاريخ (تجاهل الوقت)
-                $exists = WeeklyMeeting::where('family_id', $family->id)
-                    ->whereDate('week_date', $today)
-                    ->exists();
+                // اجتماع واحد فقط لكل عائلة في نفس التاريخ (مضمون أيضاً بـ unique index)
+                $meeting = WeeklyMeeting::firstOrCreate(
+                    ['family_id' => $family->id, 'week_date' => $today->toDateString()],
+                    ['status' => 'pending', 'max_note_score' => 28]
+                );
 
-                if (!$exists) {
-                    WeeklyMeeting::create([
-                        'family_id' => $family->id,
-                        'week_date' => $today,
-                        'status' => 'pending',
-                        'max_note_score' => 28,
-                    ]);
-
+                if ($meeting->wasRecentlyCreated) {
                     $count++;
                 }
             }

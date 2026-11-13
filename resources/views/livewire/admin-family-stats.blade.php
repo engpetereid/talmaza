@@ -56,7 +56,7 @@
                 <div
                     class="flex flex-col items-center justify-center p-6 text-center bg-white border border-gray-100 shadow-sm rounded-3xl">
                     <span class="mb-2 text-xs font-bold tracking-wider text-gray-400 uppercase">عدد المخدومين</span>
-                    <span class="text-3xl font-black text-purple-600">{{ count($data['members_stats']) }}</span>
+                    <span class="text-3xl font-black text-purple-600">{{ collect($data['members_stats'])->where('is_active', true)->count() }}</span>
                 </div>
                 <!-- Top Performer (Optional Highlight) -->
                 @if(count($data['members_stats']) > 0)

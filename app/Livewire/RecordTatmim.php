@@ -15,7 +15,7 @@ use Kreait\Firebase\Messaging\Notification;
 use Kreait\Firebase\Messaging\WebPushConfig;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Url; // Enable URL Query Parameter
+use Livewire\Attributes\Locked;
 use Carbon\Carbon;
 
 #[Layout('layouts.app')]
@@ -24,9 +24,16 @@ class RecordTatmim extends Component
     public WeeklyMeeting $meeting;
     public $step = 1;
 
-    // Read Only Mode
-    #[Url]
+    // Read Only Mode — locked so the browser cannot switch it back to editable.
+    #[Locked]
     public $readonly = false;
+
+    // الحقول المسموح بتعديلها فقط (حماية من تعديل أعمدة أخرى مثل member_id)
+    private const BOOLEAN_FIELDS = [
+        'is_present', 'has_mass', 'has_tasbeha', 'has_vespers', 'has_weekly_kholwa',
+        'has_servants_meeting', 'has_reading', 'has_family_altar', 'has_sermon',
+    ];
+    private const NUMERIC_FIELDS = ['note_score', 'kholwa_count', 'talmaza_training_count'];
 
     // بيانات الخطوة 1
     public $status = 'completed';
@@ -48,6 +55,9 @@ class RecordTatmim extends Component
         }
         // ----------------------------------
         $this->meeting = $meeting;
+
+        // ?readonly=1 in the link opens the page in view mode
+        $this->readonly = request()->boolean('readonly');
 
         if (
             ($meeting->status !== 'pending' && $meeting->created_at < Carbon::now()->subWeeks(4))
@@ -110,35 +120,42 @@ class RecordTatmim extends Component
     {
         $members = $this->meeting->family->members()->where('is_active', true)->get();
 
+        // One query for all existing records instead of one query per member on every render
+        $existing = TatmimRecord::where('weekly_meeting_id', $this->meeting->id)
+            ->whereIn('member_id', $members->pluck('id'))
+            ->get()
+            ->keyBy('member_id');
+
         foreach ($members as $member) {
-            if (!isset($this->records[$member->id])) {
-                $record = TatmimRecord::firstOrCreate(
-                    [
-                        'weekly_meeting_id' => $this->meeting->id,
-                        'member_id' => $member->id
-                    ],
-                    [
-                        'is_present' => false,
-                        'note_score' => null,
-                        'talmaza_training_count' => null,
-                        'kholwa_count' => null,
-                        'has_weekly_kholwa' => false,
-                        'has_mass' => false,
-                        'has_tasbeha' => false,
-                        'has_servants_meeting' => false,
-                        'has_reading' => false,
-                        'has_family_altar' => false,
-                        'has_sermon' => false,
-                        'has_vespers' => false,
-                    ]
-                );
-
-                // Convert to array for Livewire state
-                $data = $record->toArray();
-
-
-                $this->records[$member->id] = $data;
+            if (isset($this->records[$member->id])) {
+                continue;
             }
+
+            // createOrFirst relies on the unique (weekly_meeting_id, member_id) index,
+            // so two tabs / double clicks can no longer create duplicate rows.
+            $record = $existing->get($member->id) ?? TatmimRecord::createOrFirst(
+                [
+                    'weekly_meeting_id' => $this->meeting->id,
+                    'member_id' => $member->id,
+                ],
+                [
+                    'is_present' => false,
+                    'note_score' => null,
+                    'talmaza_training_count' => null,
+                    'kholwa_count' => null,
+                    'has_weekly_kholwa' => false,
+                    'has_mass' => false,
+                    'has_tasbeha' => false,
+                    'has_servants_meeting' => false,
+                    'has_reading' => false,
+                    'has_family_altar' => false,
+                    'has_sermon' => false,
+                    'has_vespers' => false,
+                ]
+            );
+
+            // Convert to array for Livewire state
+            $this->records[$member->id] = $record->toArray();
         }
 
         return $members;
@@ -153,18 +170,34 @@ class RecordTatmim extends Component
         $parts = explode('.', $property);
 
         if (count($parts) === 3 && $parts[0] === 'records') {
-            $memberId = $parts[1];
+            $memberId = (int) $parts[1];
             $field = $parts[2];
 
-            // If input is empty, save as 0 in DB (since DB doesn't allow null)
-            if ($value === '' && in_array($field, ['note_score', 'kholwa_count', 'talmaza_training_count'])) {
-                $value = 0;
+            if (!in_array($field, self::NUMERIC_FIELDS, true)) {
+                return;
             }
 
-            TatmimRecord::where('weekly_meeting_id', $this->meeting->id)
-                ->where('member_id', $memberId)
-                ->update([$field => $value]);
+            // Empty input is saved as 0; out-of-range values are clamped.
+            $value = $this->clampNumeric($field, $value);
+            $this->records[$memberId][$field] = $value;
+
+            $this->saveField($memberId, $field, $value);
         }
+    }
+
+    private function clampNumeric(string $field, $value): int
+    {
+        $max = $field === 'note_score' ? max((int) $this->meeting->max_note_score, 0) : 7;
+        $value = is_numeric($value) ? (int) $value : 0;
+
+        return max(0, min($value, $max));
+    }
+
+    private function saveField(int $memberId, string $field, $value): void
+    {
+        TatmimRecord::where('weekly_meeting_id', $this->meeting->id)
+            ->where('member_id', $memberId)
+            ->update([$field => $value]);
     }
 
     public function saveMeetingDetails()
@@ -246,18 +279,19 @@ class RecordTatmim extends Component
         // Block updates if readonly
         if ($this->readonly) return;
 
-        // Force integer (0 or 1) for boolean fields
-        $val = (int) $value;
+        if (!in_array($field, self::BOOLEAN_FIELDS, true)) return;
+
+        $memberId = (int) $memberId;
+        // Force 0 or 1 for boolean fields
+        $val = $value ? 1 : 0;
 
         // Update Local State for UI
         if (isset($this->records[$memberId])) {
             $this->records[$memberId][$field] = $val;
         }
 
-        // Update Database
-        TatmimRecord::where('weekly_meeting_id', $this->meeting->id)
-            ->where('member_id', $memberId)
-            ->update([$field => $val]);
+        // Update Database (scoped to this meeting, so other families' records can't be touched)
+        $this->saveField($memberId, $field, $val);
     }
 
     public function render()

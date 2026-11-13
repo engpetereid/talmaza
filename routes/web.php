@@ -45,6 +45,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
 
+    Route::get('/reports/{report}/pdf', \App\Http\Controllers\ReportPdfController::class)->name('report.pdf');
+
     Route::get('/reports', LeaderReports::class)->name('leader.reports');
     Route::get('/my-family', MyFamily::class)->name('my-family');
     Route::get('/meeting/{meeting}/record', RecordTatmim::class)->name('meeting.record');

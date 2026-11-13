@@ -27,9 +27,12 @@ class CheckAbsenceStreaks extends Command
         $this->info('جاري فحص سجلات الغياب...');
 
         // جلب العائلات مع القادة والمخدومين وآخر 3 اجتماعات مكتملة
-        $families = Family::with(['user', 'members', 'weeklyMeetings' => function($q) {
-            $q->where('status', 'completed')->latest('week_date')->take(3);
-        }])->get();
+        $families = Family::with([
+            'leader',
+            'members' => fn ($q) => $q->where('is_active', true),
+            'weeklyMeetings' => fn ($q) => $q->where('status', 'completed')->latest('week_date')->take(3),
+            'weeklyMeetings.tatmimRecords',
+        ])->get();
 
         foreach ($families as $family) {
             // تخطي العائلات التي لم تعقد 3 اجتماعات على الأقل
@@ -38,7 +41,9 @@ class CheckAbsenceStreaks extends Command
             }
 
             // الحصول على قائد العائلة (أول مستخدم بدور leader)
-            $leader = $family->user->where('role', 'leader')->first();
+            // ملاحظة: $family->user->where(...) كان يعمل استعلام جديد على جدول المستخدمين كله
+            // ويرجع أول قائد في النظام وليس قائد هذه العائلة
+            $leader = $family->leader;
 
             // إذا لم يوجد قائد، لا يمكن إرسال إشعار
             if (!$leader) {

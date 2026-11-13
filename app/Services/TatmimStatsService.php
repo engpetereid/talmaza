@@ -69,6 +69,40 @@ class TatmimStatsService
         ];
     }
 
+    /**
+     * Family averages per metric, computed from ACTIVE members only
+     * (same rule for admin and leader views).
+     */
+    public function calculateFamilyAverages(array $membersStats): array
+    {
+        $active = array_values(array_filter($membersStats, fn ($s) => !empty($s['is_active'])));
+        if (count($active) === 0) {
+            return [];
+        }
+
+        $keys = array_keys($this->getEmptyCounters());
+        $keys[] = 'total_average';
+
+        $averages = [];
+        foreach ($keys as $key) {
+            $averages[$key] = round(array_sum(array_column($active, $key)) / count($active));
+        }
+
+        return $averages;
+    }
+
+    /**
+     * Sort member stats: active members first, then by total average (highest first).
+     */
+    public function sortMembersStats(array $membersStats): array
+    {
+        usort($membersStats, function ($a, $b) {
+            return [$b['is_active'], $b['total_average']] <=> [$a['is_active'], $a['total_average']];
+        });
+
+        return $membersStats;
+    }
+
     private function getEmptyCounters()
     {
         return [

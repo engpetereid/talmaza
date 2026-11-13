@@ -50,7 +50,7 @@
 
                     <!-- Desktop Delete Button -->
                     <button wire:click="deleteFamily"
-                        wire:confirm="تحذير هام: هل أنت متأكد من حذف هذه العائلة؟ سيتم حذف جميع المخدومين وسجلاتهم نهائياً. لا يمكن التراجع عن هذا الإجراء."
+                        wire:confirm="تحذير هام: هل أنت متأكد من حذف هذه العائلة؟ سيتم حذف جميع المخدومين وسجلاتهم وحساب القائد نهائياً. لا يمكن التراجع عن هذا الإجراء."
                         class="flex items-center gap-2 px-5 py-3 font-bold text-red-600 transition-all border-2 border-red-100 bg-red-50 hover:bg-red-600 hover:text-white rounded-xl">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2.5">
@@ -369,7 +369,7 @@
                 منطقة الخطر
             </h3>
             <button wire:click="deleteFamily"
-                wire:confirm="تحذير هام: هل أنت متأكد من حذف هذه العائلة؟ سيتم حذف جميع المخدومين وسجلاتهم نهائياً. لا يمكن التراجع عن هذا الإجراء."
+                wire:confirm="تحذير هام: هل أنت متأكد من حذف هذه العائلة؟ سيتم حذف جميع المخدومين وسجلاتهم وحساب القائد نهائياً. لا يمكن التراجع عن هذا الإجراء."
                 class="flex items-center justify-center w-full gap-2 px-5 py-4 font-bold text-red-600 transition-all border-2 border-red-100 bg-red-50 hover:bg-red-600 hover:text-white rounded-xl">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2.5">

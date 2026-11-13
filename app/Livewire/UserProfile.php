@@ -63,11 +63,6 @@ class UserProfile extends Component
         ]);
 
         $user->fill($validated);
-
-        if ($user->isDirty('phone')) {
-            $user->phone_verified_at = null;
-        }
-
         $user->save();
 
         session()->flash('profile-status', 'تم تحديث البيانات بنجاح ✅');

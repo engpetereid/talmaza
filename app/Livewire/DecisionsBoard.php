@@ -38,6 +38,8 @@ class DecisionsBoard extends Component
     public $editStatus = '';
     public $editComment = '';
 
+    private const STATUSES = ['pending', 'implemented', 'not_implemented', 'postponed'];
+
     public function updatedSearch() { $this->resetPage(); }
     public function updatedFilterStatus() { $this->resetPage(); }
     public function updatedFilterMonth() { $this->resetPage(); }
@@ -95,7 +97,14 @@ class DecisionsBoard extends Component
     {
         if (Auth::user()->role !== 'admin') { abort(403); }
 
-        $decision = Announcement::findOrFail($this->editingDecisionId);
+        $this->validate([
+            'editStatus' => 'required|in:' . implode(',', self::STATUSES),
+            'editComment' => 'nullable|string|max:5000',
+        ], [
+            'editStatus.in' => 'حالة القرار غير صحيحة.',
+        ]);
+
+        $decision = Announcement::where('type', 'decision')->findOrFail($this->editingDecisionId);
 
         $decision->update([
             'status' => $this->editStatus,
@@ -120,7 +129,7 @@ class DecisionsBoard extends Component
     {
         if (Auth::user()->role !== 'admin') { return; }
 
-        $post = Announcement::find($id);
+        $post = Announcement::where('type', 'decision')->find($id);
         if ($post) {
             if ($post->attachment) {
                 Storage::disk('public')->delete($post->attachment);

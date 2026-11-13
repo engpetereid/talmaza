@@ -40,24 +40,10 @@ class LeaderDashboard extends Component
         }
     }
 
-    public function createTestMeeting()
-    {
-        if (!$this->family) return;
-
-        WeeklyMeeting::create([
-            'family_id' => $this->family->id,
-            'week_date' => now(),
-            'status' => 'pending',
-            'max_note_score' => 28,
-        ]);
-
-        return redirect(request()->header('Referer'));
-    }
-
     public function render()
     {
         return view('livewire.leader-dashboard', [
-            'latestPost' => Announcement::latest()->first()
+            'latestPost' => Announcement::where('type', 'announcement')->latest()->first()
         ]);
     }
 }

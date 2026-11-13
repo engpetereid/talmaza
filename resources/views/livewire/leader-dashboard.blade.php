@@ -82,11 +82,6 @@
                                     مراجعة البيانات
                                 </a>
                             @endif
-                        @else
-                            <button wire:click="createTestMeeting"
-                                class="w-full px-6 py-4 font-bold text-indigo-600 transition-colors border-2 border-indigo-100 md:w-auto bg-indigo-50 hover:bg-indigo-100 rounded-2xl">
-                                🧪 إنشاء اجتماع تجريبي
-                            </button>
                         @endif
                     </div>
                 </div>
