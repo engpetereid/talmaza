@@ -111,14 +111,13 @@
                     <!-- Score Config -->
                     <section class="p-8 text-center text-white shadow-lg bg-gradient-to-r from-indigo-600 to-purple-700 rounded-3xl">
                         <label class="block mb-4 text-lg font-bold text-indigo-100">درجة النوتة الروحية</label>
-                        <div class="flex items-center justify-center gap-8">
-                            @if(!$readonly)
-                                <button wire:click="$set('max_note_score', {{ (int)$max_note_score - 1 }})" class="flex items-center justify-center text-3xl font-bold transition-colors rounded-full w-14 h-14 bg-white/20 hover:bg-white/30">-</button>
-                            @endif
-                            <span class="font-black tracking-tighter text-7xl">{{ $max_note_score }}</span>
-                            @if(!$readonly)
-                                <button wire:click="$set('max_note_score', {{ (int)$max_note_score + 1 }})" class="flex items-center justify-center text-3xl font-bold transition-colors rounded-full w-14 h-14 bg-white/20 hover:bg-white/30">+</button>
-                            @endif
+                        <div class="flex items-center justify-center">
+                            <input type="number"
+                                   inputmode="numeric"
+                                   min="0"
+                                   @if($readonly) disabled @endif
+                                   wire:model.blur="max_note_score"
+                                   class="block w-40 p-4 text-4xl font-black text-center text-gray-900 bg-white border-2 border-white/40 rounded-2xl focus:ring-indigo-300 focus:border-indigo-300">
                         </div>
                     </section>
                 @endif

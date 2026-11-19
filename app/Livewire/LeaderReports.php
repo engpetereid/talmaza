@@ -52,10 +52,7 @@ class LeaderReports extends Component
             return;
         }
 
-        $storedPin = Auth::user()->report_pin;
-
-        if ($storedPin && is_string($this->pinAttempt) && $this->pinAttempt !== ''
-            && Hash::check($this->pinAttempt, $storedPin)) {
+        if (is_string($this->pinAttempt) && $this->pinAttempt !== '' && $this->pinMatches($this->pinAttempt)) {
             RateLimiter::clear($throttleKey);
             $this->isLocked = false;
             session()->put($this->sessionKey(), true);
@@ -84,6 +81,33 @@ class LeaderReports extends Component
             $report->delete();
             session()->flash('message', 'تم حذف التقرير بنجاح 🗑️');
         }
+    }
+
+    /**
+     * Check the PIN. Handles legacy plain-text PINs (from before PINs were hashed):
+     * they are compared safely and upgraded to a hash on the first successful unlock.
+     */
+    private function pinMatches(string $attempt): bool
+    {
+        $user = Auth::user();
+        $storedPin = $user->getRawOriginal('report_pin');
+
+        if (!$storedPin) {
+            return false;
+        }
+
+        if (Hash::isHashed($storedPin)) {
+            return Hash::check($attempt, $storedPin);
+        }
+
+        if (!hash_equals((string) $storedPin, $attempt)) {
+            return false;
+        }
+
+        // Upgrade the legacy plain-text PIN (the 'hashed' cast hashes it on save)
+        $user->forceFill(['report_pin' => $attempt])->save();
+
+        return true;
     }
 
     private function sessionKey(): string

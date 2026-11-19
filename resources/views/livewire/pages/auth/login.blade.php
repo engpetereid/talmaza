@@ -13,13 +13,19 @@ new #[Layout('layouts.guest')] class extends Component {
      */
     public function login(): void
     {
+        // Already logged in (e.g. a duplicate submit) -> just go to the dashboard
+        if (auth()->check()) {
+            $this->redirectIntended(default: route('dashboard', absolute: false));
+            return;
+        }
+
         $this->validate();
 
         $this->form->authenticate();
 
         Session::regenerate();
 
-        $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+        $this->redirectIntended(default: route('dashboard', absolute: false));
 
     }
 
@@ -135,11 +141,11 @@ new #[Layout('layouts.guest')] class extends Component {
             </div>
 
             <!-- Submit Button -->
-            <button type="submit"
-                class="w-full bg-indigo-600 text-white text-xl font-black py-4 rounded-2xl shadow-xl shadow-indigo-200 hover:bg-indigo-700 hover:shadow-2xl transition-all transform active:scale-[0.98] flex items-center justify-center gap-3">
-                <span wire:loading.remove>دخول</span>
-                <span wire:loading>جاري الدخول...</span>
-                <svg wire:loading.remove xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+            <button type="submit" wire:loading.attr="disabled" wire:target="login"
+                class="disabled:opacity-60 disabled:cursor-not-allowed w-full bg-indigo-600 text-white text-xl font-black py-4 rounded-2xl shadow-xl shadow-indigo-200 hover:bg-indigo-700 hover:shadow-2xl transition-all transform active:scale-[0.98] flex items-center justify-center gap-3">
+                <span wire:loading.remove wire:target="login">دخول</span>
+                <span wire:loading wire:target="login">جاري الدخول...</span>
+                <svg wire:loading.remove wire:target="login" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                     fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="5" y1="12" x2="19" y2="12" />
                     <polyline points="12 5 19 12 12 19" />
